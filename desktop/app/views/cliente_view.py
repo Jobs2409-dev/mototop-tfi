@@ -1,4 +1,4 @@
-# C:\Users\jonat\MotoTop\desktop\app\views\cliente_view.py
+# desktop/app/views/cliente_view.py
 from PyQt6.QtWidgets import (
     QWidget,
     QVBoxLayout,
@@ -16,7 +16,8 @@ from PyQt6.QtCore import Qt
 from services.cliente_service import ClienteService
 from services.zona_service import ZonaService
 from services.user_service import UserService
-from views.cliente_form import ClienteForm
+from form.cliente_form import ClienteForm
+from style.views.cliente_view_style import ESTILO_CLIENTE_VIEW
 
 
 class ClienteView(QWidget):
@@ -33,7 +34,9 @@ class ClienteView(QWidget):
         self.init_ui()
 
     def init_ui(self):
-        # Corrección: Nombre unificado del layout principal con márgenes limpios
+        # 1. Aplicar estilo global del módulo
+        self.setStyleSheet(ESTILO_CLIENTE_VIEW)
+
         main_layout = QVBoxLayout()
         main_layout.setContentsMargins(15, 15, 15, 15)
         main_layout.setSpacing(10)
@@ -43,49 +46,23 @@ class ClienteView(QWidget):
         # =========================
         top_bar = QHBoxLayout()
         self.btn_new = QPushButton("Nuevo Cliente")
+        self.btn_new.setObjectName("btn_nuevo_cliente")
+
         self.btn_refresh = QPushButton("Recargar")
-
-        self.btn_new.setStyleSheet("""
-            QPushButton {
-                background-color: #673AB7;
-                color: white;
-                border: none;
-                padding: 8px 16px;
-                border-radius: 4px;
-                font-weight: bold;
-                font-size: 13px;
-            }
-            QPushButton:hover {
-                background-color: #5E35B1;
-            }
-        """)
-
-        self.btn_refresh.setStyleSheet("""
-            QPushButton {
-                background-color: #757575;
-                color: white;
-                border: none;
-                padding: 8px 16px;
-                border-radius: 4px;
-                font-weight: bold;
-                font-size: 13px;
-            }
-            QPushButton:hover {
-                background-color: #616161;
-            }
-        """)
+        self.btn_refresh.setObjectName("btn_refrescar_cliente")
 
         top_bar.addWidget(self.btn_new)
         top_bar.addWidget(self.btn_refresh)
         top_bar.addStretch()
 
         self.btn_refresh.clicked.connect(self.load_data)
-        self.btn_new.clicked.connect(self.open_form)  # Corrección: Conexión directa sin lambda innecesario
+        self.btn_new.clicked.connect(self.open_form)
 
         # =========================
         # TABLA DE CLIENTES
         # =========================
         self.table = QTableWidget()
+        self.table.setObjectName("tabla_clientes")
         self.table.setColumnCount(13)
         self.table.setHorizontalHeaderLabels([
             "ID", "Nombre", "Apellido", "Documento", "Teléfono",
@@ -97,25 +74,6 @@ class ClienteView(QWidget):
         self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.table.setAlternatingRowColors(True)
         self.table.setShowGrid(True)
-
-        self.table.setStyleSheet("""
-            QTableWidget {
-                background-color: #FFFFFF;
-                alternate-background-color: #F9F9F9;
-                gridline-color: #E0E0E0;
-                border: 1px solid #D8D8D8;
-                border-radius: 4px;
-                selection-background-color: #EDE7F6;
-                selection-color: #311B92;
-            }
-            QHeaderView::section {
-                background-color: #F5F5F5;
-                color: #333333;
-                padding: 6px;
-                font-weight: bold;
-                border: 1px solid #E0E0E0;
-            }
-        """)
 
         header = self.table.horizontalHeader()
         header.setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
@@ -202,37 +160,13 @@ class ClienteView(QWidget):
                 actions_layout.setSpacing(6)
 
                 btn_edit = QPushButton("Editar")
-                btn_edit.setStyleSheet("""
-                    QPushButton {
-                        background-color: #673AB7;
-                        color: white;
-                        border: none;
-                        padding: 4px 8px;
-                        border-radius: 3px;
-                        font-weight: bold;
-                    }
-                    QPushButton:hover {
-                        background-color: #5E35B1;
-                    }
-                """)
+                btn_edit.setObjectName("btn_accion_editar")
                 btn_edit.clicked.connect(
                     lambda checked, c=cliente: self.open_form(c)
                 )
 
                 btn_delete = QPushButton("Eliminar")
-                btn_delete.setStyleSheet("""
-                    QPushButton {
-                        background-color: #E53935;
-                        color: white;
-                        border: none;
-                        padding: 4px 8px;
-                        border-radius: 3px;
-                        font-weight: bold;
-                    }
-                    QPushButton:hover {
-                        background-color: #D32F2F;
-                    }
-                """)
+                btn_delete.setObjectName("btn_accion_eliminar")
                 btn_delete.clicked.connect(
                     lambda checked, cid=cliente.get("id"), r=row: self.delete_cliente(cid, r)
                 )

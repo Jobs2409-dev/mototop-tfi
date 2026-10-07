@@ -1,3 +1,4 @@
+# desktop/app/form/cliente_form.py
 from PyQt6.QtWidgets import (
     QWidget,
     QVBoxLayout,

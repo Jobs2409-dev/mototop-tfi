@@ -1,4 +1,4 @@
-#views/vendedor_form.py
+# desktop/app/form/vendedor_form.py
 from PyQt6.QtWidgets import (
     QWidget,
     QVBoxLayout,

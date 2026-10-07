@@ -1,5 +1,5 @@
+# desktop/app/services/informe_service.py
 from core.http_client import HttpClient
-
 
 class InformeService:
 

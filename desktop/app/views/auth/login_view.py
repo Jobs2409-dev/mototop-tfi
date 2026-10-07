@@ -1,4 +1,4 @@
-# desktop/app/views/login_view.py
+# desktop/app/views/auth/login_view.py
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLineEdit, QPushButton, QLabel, QSpacerItem, QSizePolicy
 from PyQt6.QtCore import pyqtSignal, Qt, QTimer
 from PyQt6.QtGui import QPixmap, QColor, QPainter

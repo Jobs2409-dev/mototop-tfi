@@ -6,7 +6,7 @@ from core.http_client import HttpClient
 from core.auth_store import AuthStore
 from services.auth_service import AuthService
 
-from views.login_view import LoginView
+from views.auth.login_view import LoginView # Login
 from views.main_window import MainWindow
 
 

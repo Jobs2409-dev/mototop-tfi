@@ -6,8 +6,9 @@ from PyQt6.QtWidgets import (
 
 from services.rubro_service import RubroService
 from services.proveedor_service import ProveedorService
-from views.producto_form import ProductoForm
-from views.producto_card import ProductoCard
+from form.producto_form import ProductoForm
+from components.producto_card import ProductoCard
+from style.views.producto_view_styles import ESTILO_PRODUCTO_VIEW
 
 
 class ProductoView(QWidget):
@@ -23,82 +24,39 @@ class ProductoView(QWidget):
         self.has_next = False
         self.has_prev = False
 
+        # 1. Aplicar estilo desacoplado
+        self.setStyleSheet(ESTILO_PRODUCTO_VIEW)
+
         layout = QVBoxLayout()
+        layout.setContentsMargins(15, 15, 15, 15)
+        layout.setSpacing(10)
 
         # =========================
         # TOP BAR
         # =========================
-
         top_bar = QHBoxLayout()
 
-        self.btn_prev = QPushButton("Anterior")
-        self.btn_next = QPushButton("Siguiente")
-        self.btn_refresh = QPushButton("Recargar")
         self.btn_new = QPushButton("Nuevo")
+        self.btn_new.setObjectName("btn_nuevo_producto")
 
-        self.btn_new.setStyleSheet("""
-            QPushButton {
-                background-color: #2196F3;
-                color: white;
-                border: none;
-                padding: 8px 16px;
-                border-radius: 4px;
-                font-weight: bold;
-            }
-            QPushButton:hover {
-                background-color: #0b7dda;
-            }
-        """)
+        self.btn_prev = QPushButton("Anterior")
+        self.btn_prev.setProperty("class", "btn_secondary_action")
 
-        self.btn_refresh.setStyleSheet("""
-            QPushButton {
-                background-color: #757575;
-                color: white;
-                border: none;
-                padding: 8px 16px;
-                border-radius: 4px;
-                font-weight: bold;
-            }
-            QPushButton:hover {
-                background-color: #616161;
-            }
-        """)
+        self.btn_next = QPushButton("Siguiente")
+        self.btn_next.setProperty("class", "btn_secondary_action")
 
-        self.btn_prev.setStyleSheet("""
-            QPushButton {
-                background-color: #757575;
-                color: white;
-                border: none;
-                padding: 8px 16px;
-                border-radius: 4px;
-                font-weight: bold;
-            }
-            QPushButton:hover {
-                background-color: #616161;
-            }
-        """)
-
-        self.btn_next.setStyleSheet("""
-            QPushButton {
-                background-color: #757575;
-                color: white;
-                border: none;
-                padding: 8px 16px;
-                border-radius: 4px;
-                font-weight: bold;
-            }
-            QPushButton:hover {
-                background-color: #616161;
-            }
-        """)
+        self.btn_refresh = QPushButton("Recargar")
+        self.btn_refresh.setProperty("class", "btn_secondary_action")
 
         self.lbl_page = QLabel("Página: 1")
+        self.lbl_page.setObjectName("lbl_numero_pagina")
 
         top_bar.addWidget(self.btn_new)
         top_bar.addWidget(self.btn_prev)
         top_bar.addWidget(self.btn_next)
         top_bar.addWidget(self.btn_refresh)
         top_bar.addWidget(self.lbl_page)
+        top_bar.addStretch()
 
         self.btn_prev.clicked.connect(self.prev_page)
         self.btn_next.clicked.connect(self.next_page)
@@ -108,12 +66,13 @@ class ProductoView(QWidget):
         # =========================
         # GRID DE CARDS
         # =========================
-
         self.container = QWidget()
         self.grid = QGridLayout()
+        self.grid.setSpacing(12)
         self.container.setLayout(self.grid)
 
         self.scroll = QScrollArea()
+        self.scroll.setObjectName("scroll_productos")
         self.scroll.setWidgetResizable(True)
         self.scroll.setWidget(self.container)
 
@@ -121,8 +80,6 @@ class ProductoView(QWidget):
         layout.addWidget(self.scroll)
 
         self.setLayout(layout)
-
-        # cargar inicial
         self.load_data()
 
     # =========================
@@ -135,21 +92,17 @@ class ProductoView(QWidget):
             self.has_next = data.get("next") is not None
             self.has_prev = data.get("previous") is not None
 
-            # limpiar grid
+            # Limpiar grid
             for i in reversed(range(self.grid.count())):
                 widget = self.grid.itemAt(i).widget()
                 if widget:
                     widget.setParent(None)
 
-            # render cards
             cols = 3
-
             for i, p in enumerate(productos):
                 card = ProductoCard(p, self.service, self.load_data)
-
                 row = i // cols
                 col = i % cols
-
                 self.grid.addWidget(card, row, col)
 
             self.lbl_page.setText(f"Página: {self.page}")

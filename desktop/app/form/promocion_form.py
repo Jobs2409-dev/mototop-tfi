@@ -1,4 +1,4 @@
-# desktop/app/views/promocion_form.py
+# desktop/app/form/promocion_form.py
 from PyQt6.QtWidgets import (
     QWidget,
     QVBoxLayout,

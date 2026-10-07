@@ -1,4 +1,4 @@
-# C:\Users\jonat\MotoTop\desktop\app\views\pedido_form.py
+# desktop/app/form/pedido_form.py
 from PyQt6.QtWidgets import (
     QWidget,
     QVBoxLayout,

@@ -26,4 +26,3 @@ class ProductoPromocionService:
 
         response.raise_for_status()
         
-        

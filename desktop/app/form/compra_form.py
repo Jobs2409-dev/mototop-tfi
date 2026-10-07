@@ -1,4 +1,4 @@
-# desktop/app/views/compra_form.py
+# desktop/app/form/compra_form.py
 from PyQt6.QtWidgets import (
     QWidget,
     QVBoxLayout,

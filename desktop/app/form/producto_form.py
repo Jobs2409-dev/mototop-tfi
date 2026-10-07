@@ -1,4 +1,4 @@
-# desktop/app/views/producto_form.py
+# desktop/app/form/producto_form.py
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton,
     QListWidget, QLabel, QMessageBox, QListWidgetItem, QFileDialog, QApplication

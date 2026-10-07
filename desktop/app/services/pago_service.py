@@ -1,3 +1,4 @@
+# desktop/app/services/pago_service.py
 class PagoService:
 
     def __init__(self, http):
