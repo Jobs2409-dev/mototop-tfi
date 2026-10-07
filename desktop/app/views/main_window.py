@@ -7,6 +7,8 @@ from PyQt6.QtWidgets import (
     QStackedWidget,
     QLabel
 )
+
+from style.views.main_window_styles import ESTILO_MAIN_WINDOW
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtCore import Qt
 
@@ -109,7 +111,7 @@ class MainWindow(QWidget):
         # ============================
         logo_label = QLabel()
         # Cambia "ruta/de/tu/logo.png" por la dirección real de tu imagen (ej. "assets/logo.png")
-        pixmap = QPixmap("img\moto-top-sinfondo.png") 
+        pixmap = QPixmap("img/moto-top-sinfondo.png")
         
         # Redimensionar la imagen para que se ajuste al ancho del menú (ej. 150px de ancho)
         # manteniendo la relación de aspecto y con escalado suave
@@ -193,7 +195,11 @@ class MainWindow(QWidget):
         # =========================
         # CONEXIONES
         # =========================
-        btn_productos.clicked.connect(lambda: self.stack.setCurrentWidget(self.view_productos))
+        def ir_a_productos():
+            self.view_productos.load_data()  # Refresca stock en tiempo real desde la API
+            self.stack.setCurrentWidget(self.view_productos)
+
+        btn_productos.clicked.connect(ir_a_productos)
         btn_vendedores.clicked.connect(lambda: self.stack.setCurrentWidget(self.view_vendedores))
         btn_clientes.clicked.connect(lambda: self.stack.setCurrentWidget(self.view_clientes))
         btn_pedidos.clicked.connect(lambda: self.stack.setCurrentWidget(self.view_pedidos))
@@ -210,38 +216,5 @@ class MainWindow(QWidget):
         main_layout.addWidget(self.center_container, 4)
 
         self.setLayout(main_layout)
-        self.apply_styles()
+        self.setStyleSheet(ESTILO_MAIN_WINDOW)
         
-    def apply_styles(self):
-        self.setStyleSheet("""
-            QWidget#main_container {
-                background-color: #c8cbd0;
-            }
-
-            QWidget#sidebar {
-                background-color: #1e1e24;
-                border-right: 1px solid #3a3a4a;
-            }
-
-            QWidget#sidebar QPushButton {
-                background-color: transparent;
-                color: #ffffff;
-                border: none;
-                border-radius: 6px;
-                padding: 12px 15px;
-                text-align: left;
-                font-family: 'Segoe UI', Helvetica, Arial, sans-serif;
-                font-size: 14px;
-                font-weight: bold;
-            }
-
-            QWidget#sidebar QPushButton:hover {
-                background-color: #2a2a35;
-                color: #e53935;
-            }
-
-            QWidget#sidebar QPushButton:pressed {
-                background-color: #e53935;
-                color: #ffffff;
-            }
-        """)

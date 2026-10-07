@@ -15,6 +15,8 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtGui import QDoubleValidator
 from PyQt6.QtCore import Qt
 
+from style.form.vendedor_form_styles import ESTILO_VENDEDOR_FORM
+
 
 class VendedorForm(QWidget):
 
@@ -36,58 +38,13 @@ class VendedorForm(QWidget):
 
         self.setWindowTitle("Editar Vendedor" if vendedor else "Nuevo Vendedor")
         self.resize(480, 650)
+        self.setObjectName("vendedor_form_window")
+        self.setStyleSheet(ESTILO_VENDEDOR_FORM)
         
         self.zonas = []
         self.init_ui()
 
     def init_ui(self):
-        # Estilos generales del formulario y componentes
-        self.setStyleSheet("""
-            QWidget {
-                background-color: #F5F5F5;
-                font-size: 13px;
-                color: #333333;
-            }
-            QGroupBox {
-                background-color: #FFFFFF;
-                border: 1px solid #D8D8D8;
-                border-radius: 6px;
-                margin-top: 15px;
-                font-weight: bold;
-                padding-top: 10px;
-            }
-            QGroupBox::title {
-                subcontrol-origin: margin;
-                subcontrol-position: top left;
-                left: 15px;
-                padding: 0 5px;
-                color: #2196F3;
-            }
-            QLineEdit, QComboBox {
-                background-color: #FFFFFF;
-                border: 1px solid #CCCCCC;
-                border-radius: 4px;
-                padding: 6px;
-                min-height: 20px;
-            }
-            QLineEdit:focus, QComboBox:focus {
-                border: 1px solid #2196F3;
-            }
-            QPushButton#btn_save {
-                background-color: #4CAF50;
-                color: white;
-                font-weight: bold;
-                font-size: 14px;
-                border: none;
-                border-radius: 4px;
-                padding: 10px;
-                min-height: 25px;
-            }
-            QPushButton#btn_save:hover {
-                background-color: #43A047;
-            }
-        """)
-
         main_layout = QVBoxLayout()
         main_layout.setContentsMargins(20, 10, 20, 20)
         main_layout.setSpacing(15)
@@ -106,7 +63,7 @@ class VendedorForm(QWidget):
         
         self.comision = QLineEdit()
         self.comision.setPlaceholderText("0.00")
-        # Validador numérico estricto para la comisión (2 decimales)
+        
         validador_comision = QDoubleValidator(0.00, 100.00, 2, self)
         validador_comision.setNotation(QDoubleValidator.Notation.StandardNotation)
         self.comision.setValidator(validador_comision)
@@ -135,23 +92,8 @@ class VendedorForm(QWidget):
         self.zona.setSizePolicy(self.zona.sizePolicy().Policy.Expanding, self.zona.sizePolicy().Policy.Fixed)
         
         self.btn_add_zona = QPushButton("+")
+        self.btn_add_zona.setObjectName("btn_add_zona")
         self.btn_add_zona.setFixedWidth(36)
-        self.btn_add_zona.setStyleSheet("""
-            QPushButton {
-                background-color: #2196F3;
-                color: white;
-                font-weight: bold;
-                border: none;
-                border-radius: 4px;
-                padding: 6px;
-            }
-            QPushButton:hover {
-                background-color: #0b7dda;
-            }
-            QPushButton:disabled {
-                background-color: #BDBDBD;
-            }
-        """)
         self.btn_add_zona.clicked.connect(self.add_new_zona)
         
         zona_container.addWidget(self.zona)
@@ -190,7 +132,7 @@ class VendedorForm(QWidget):
 
         self.setLayout(main_layout)
 
-        # Cargas iniciales obligatorias
+        # Cargas iniciales
         self.load_zonas()
 
         if self.vendedor:
@@ -234,7 +176,6 @@ class VendedorForm(QWidget):
                 self.username.setText("[No disponible]")
                 self.password.setText("[No disponible]")
 
-        # Configuración de modo lectura para edición
         self.username.setReadOnly(True)
         self.password.setReadOnly(True)
         self.password.setEchoMode(QLineEdit.EchoMode.Normal)
@@ -274,7 +215,6 @@ class VendedorForm(QWidget):
                 raise ValueError("La 'Contraseña' es obligatoria para nuevos vendedores.")
 
     def build_vendedor_data(self, user_id=None):
-        # Normalización del separador decimal para evitar fallos de persistencia
         comision_val = self.comision.text().strip().replace(",", ".")
         
         data = {

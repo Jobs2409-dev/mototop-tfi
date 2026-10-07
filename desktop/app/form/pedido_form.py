@@ -13,67 +13,11 @@ from PyQt6.QtWidgets import (
     QFormLayout
 )
 from PyQt6.QtCore import Qt
+from style.form.pedidos_form_styles import ESTILO_FORM_PEDIDO
 
-# --- CONSTANTE DE ESTILO DE ADMINISTRADOR PARA EL FORMULARIO ---
-ESTILO_FORM_PEDIDO = """
-QWidget#pedido_form_window {
-    background-color: #f5f6f8;
-    font-family: 'Segoe UI', Arial, sans-serif;
-}
-
-QLabel {
-    font-size: 13px;
-    font-weight: bold;
-    color: #4a5568;
-}
-
-QComboBox, QSpinBox, QTextEdit {
-    background-color: #ffffff;
-    border: 1px solid #cbd5e1;
-    border-radius: 5px;
-    padding: 6px 10px;
-    font-size: 13px;
-}
-
-QComboBox:focus, QSpinBox:focus, QTextEdit:focus {
-    border: 1px solid #e53935; /* Foco Rojo Administrativo */
-}
-
-QPushButton#btn_agregar {
-    background-color: #1e1e24; /* Negro corporativo */
-    color: white;
-    font-weight: bold;
-    border-radius: 5px;
-    padding: 8px 15px;
-}
-QPushButton#btn_agregar:hover {
-    background-color: #2d2d35;
-}
-
-QPushButton#btn_guardar_pedido {
-    background-color: #e53935; /* Rojo Destacado */
-    color: white;
-    font-weight: bold;
-    font-size: 14px;
-    border-radius: 5px;
-    padding: 12px;
-}
-QPushButton#btn_guardar_pedido:hover {
-    background-color: #d32f2f;
-}
-
-QPushButton#btn_eliminar_fila {
-    background-color: #fee2e2;
-    color: #b91c1c;
-    border: 1px solid #fca5a5;
-    font-weight: bold;
-    border-radius: 4px;
-    padding: 5px;
-}
-QPushButton#btn_eliminar_fila:hover {
-    background-color: #fecaca;
-}
-"""
+from form.cliente_form import ClienteForm
+from services.zona_service import ZonaService
+from services.user_service import UserService
 
 class PedidoForm(QWidget):
 
@@ -103,10 +47,19 @@ class PedidoForm(QWidget):
         form_layout = QFormLayout()
         form_layout.setSpacing(12)
 
-        # Combo Cliente
+        # Combo Cliente + Botón de alta rápida (ÚNICA FILA)
+        cliente_layout = QHBoxLayout()
         self.cliente_combo = QComboBox()
-        form_layout.addRow("Cliente:", self.cliente_combo)
-
+        self.btn_add_cliente = QPushButton("+")
+        self.btn_add_cliente.setObjectName("btn_add_cliente")
+        self.btn_add_cliente.setFixedWidth(35)
+        self.btn_add_cliente.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_add_cliente.clicked.connect(self.abrir_nuevo_cliente)
+        
+        cliente_layout.addWidget(self.cliente_combo)
+        cliente_layout.addWidget(self.btn_add_cliente)
+        form_layout.addRow("Cliente:", cliente_layout)
+        
         # Combo Vendedor
         self.vendedor_combo = QComboBox()
         self.vendedor_combo.addItem("Sin vendedor", None)
@@ -272,4 +225,25 @@ class PedidoForm(QWidget):
         except Exception as e:
             QMessageBox.critical(self, "Error", f"No se pudo guardar el pedido: {e}")
             
-            
+    
+    def abrir_nuevo_cliente(self):
+        zona_service = ZonaService(self.cliente_service.http)
+        user_service = UserService(self.cliente_service.http)
+
+        self.cliente_window = ClienteForm(
+            cliente_service=self.cliente_service,
+            zona_service=zona_service,
+            user_service=user_service,
+            on_success=self.recargar_clientes
+        )
+        self.cliente_window.show()
+
+    def recargar_clientes(self):
+        self.cliente_combo.clear()
+        clientes = self.cliente_service.listar()
+        clientes_data = clientes.get("results", clientes)
+        for c in clientes_data:
+            self.cliente_combo.addItem(f"{c['nombre']} {c.get('apellido','')}".strip(), c["id"])
+        # Selecciona el último creado
+        if self.cliente_combo.count() > 0:
+            self.cliente_combo.setCurrentIndex(self.cliente_combo.count() - 1)

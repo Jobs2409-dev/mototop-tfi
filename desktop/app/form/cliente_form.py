@@ -12,76 +12,7 @@ from PyQt6.QtWidgets import (
     QFormLayout,
     QTabWidget
 )
-
-# --- NUEVO: Estilo visual moderno (QSS) ---
-ESTILO_MODERNO = """
-    QWidget {
-        font-family: 'Segoe UI', Arial, sans-serif;
-        font-size: 13px;
-        background-color: #f8f9fa;
-        color: #333333;
-    }
-    QLineEdit, QComboBox {
-        border: 1px solid #ced4da;
-        border-radius: 4px;
-        padding: 6px 12px;
-        background-color: #ffffff;
-    }
-    QLineEdit:focus, QComboBox:focus {
-        border: 1px solid #0d6efd;
-        background-color: #fff;
-    }
-    QPushButton {
-        background-color: #0d6efd;
-        color: white;
-        border: none;
-        padding: 8px 16px;
-        border-radius: 4px;
-        font-weight: bold;
-    }
-    QPushButton:hover {
-        background-color: #0b5ed7;
-    }
-    QPushButton:disabled {
-        background-color: #6c757d;
-    }
-    QPushButton#btn_add_zona {
-        background-color: #198754;
-    }
-    QPushButton#btn_add_zona:hover {
-        background-color: #157347;
-    }
-    QTabWidget::pane {
-        border: 1px solid #dee2e6;
-        background: #ffffff;
-        border-radius: 4px;
-    }
-    QTabBar::tab {
-        background: #e9ecef;
-        padding: 8px 16px;
-        border-top-left-radius: 4px;
-        border-top-right-radius: 4px;
-        margin-right: 2px;
-    }
-    QTabBar::tab:selected {
-        background: #ffffff;
-        border-bottom: 2px solid #0d6efd;
-        font-weight: bold;
-    }
-    QPushButton#btn_guardar {
-    background-color: #6f42c1;  /* Morado principal */
-    color: white;
-    }
-
-    QPushButton#btn_guardar:hover {
-        background-color: #59359a;  /* Morado más oscuro al pasar el mouse */
-    }
-
-    QPushButton#btn_guardar:pressed {
-        background-color: #492a80;  /* Morado aún más oscuro al hacer clic */
-    }
-"""
-
+from style.form.cliente_form_styles import ESTILO_MODERNO
 
 class ClienteForm(QWidget):
 
@@ -347,50 +278,33 @@ class ClienteForm(QWidget):
         try:
             self.validate_data()
 
-            if self.cliente:
-                username = self.username.text().strip()
-                user_id = self.cliente.get("usuario")
+            username = self.username.text().strip()
+            password = self.password.text().strip()
 
+            if self.cliente:
+                user_id = self.cliente.get("usuario")
                 if not user_id and username:
-                    password = self.password.text().strip()
-                    user = self.user_service.crear(
-                        {
-                            "username": username,
-                            "password": password,
-                        }
-                    )
+                    user = self.user_service.crear({
+                        "username": username,
+                        "password": password,
+                    })
                     user_id = user["id"]
 
                 data = self.build_cliente_data(user_id=user_id)
                 self.cliente_service.actualizar(self.cliente["id"], data)
-
-                QMessageBox.information(
-                    self,
-                    "OK",
-                    "Cliente actualizado correctamente",
-                )
+                QMessageBox.information(self, "Operación Exitosa", "Cliente actualizado correctamente.")
             else:
-                username = self.username.text().strip()
-                password = self.password.text().strip()
                 user_id = None
-
                 if username:
-                    user = self.user_service.crear(
-                        {
-                            "username": username,
-                            "password": password,
-                        }
-                    )
+                    user = self.user_service.crear({
+                        "username": username,
+                        "password": password,
+                    })
                     user_id = user["id"]
 
                 cliente_data = self.build_cliente_data(user_id=user_id)
                 self.cliente_service.crear(cliente_data)
-
-                QMessageBox.information(
-                    self,
-                    "OK",
-                    "Cliente creado correctamente",
-                )
+                QMessageBox.information(self, "Operación Exitosa", "Cliente registrado correctamente.")
 
             self.on_success()
             self.close()
@@ -398,4 +312,12 @@ class ClienteForm(QWidget):
         except ValueError as e:
             QMessageBox.warning(self, "Validación", str(e))
         except Exception as e:
-            QMessageBox.critical(self, "Error", str(e))
+            # Captura y muestra el mensaje real devuelto por el servidor si viene de requests
+            error_msg = str(e)
+            if hasattr(e, 'response') and e.response is not None:
+                try:
+                    error_json = e.response.json()
+                    error_msg = "\n".join([f"{k}: {v}" for k, v in error_json.items()])
+                except Exception:
+                    error_msg = e.response.text or str(e)
+            QMessageBox.critical(self, "Error al registrar", f"No se pudo completar la operación:\n{error_msg}")

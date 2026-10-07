@@ -1,4 +1,5 @@
 # desktop/app/views/factura_view.py
+from datetime import datetime
 from PyQt6.QtWidgets import (
     QWidget,
     QVBoxLayout,
@@ -9,8 +10,9 @@ from PyQt6.QtWidgets import (
     QHBoxLayout,
 )
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QFont
+
 from style.views.factura_view_style import ESTILO_VIEW_FACTURA
+
 
 class FacturaView(QWidget):
 
@@ -21,7 +23,6 @@ class FacturaView(QWidget):
         self.setWindowTitle("Facturas")
         self.resize(550, 700)
         
-        # Enlace de estilos base
         self.setObjectName("main_factura_view")
         self.setStyleSheet(ESTILO_VIEW_FACTURA)
 
@@ -91,9 +92,9 @@ class FacturaView(QWidget):
         card_layout.setContentsMargins(15, 15, 15, 15)
         card_layout.setSpacing(10)
 
-        # Línea Superior: Título y Estado Badge
+        # 1. Línea Superior: Título y Estado Badge
         header_layout = QHBoxLayout()
-        title = QLabel(f"Factura #{factura['id']} — Pedido #{factura['pedido']}")
+        title = QLabel(f"Factura #{factura['id']} — Pedido #{factura.get('pedido', '-')}")
         title.setObjectName("title_factura")
         
         is_pagada = factura.get("pagada", False)
@@ -106,12 +107,40 @@ class FacturaView(QWidget):
         header_layout.addStretch()
         card_layout.addLayout(header_layout)
 
-        # Línea Central: Metadatos y Total
+        # 2. Datos del Cliente
+        pedido_data = factura.get('pedido_detalle') or {}
+        cliente = factura.get('cliente') or pedido_data.get('cliente')
+        if isinstance(cliente, dict):
+            cliente_nombre = f"{cliente.get('nombre', '')} {cliente.get('apellido', '')}".strip()
+            cliente_doc = cliente.get('nro_documento', '')
+            cliente_text = f"Cliente: {cliente_nombre} (DNI/CUIT: {cliente_doc})" if cliente_doc else f"Cliente: {cliente_nombre}"
+        elif cliente:
+            cliente_text = f"Cliente ID: {cliente}"
+        else:
+            cliente_text = "Cliente: Mostrador / Consumidor Final"
+
+        lbl_cliente = QLabel(cliente_text)
+        lbl_cliente.setObjectName("cliente_factura")
+        card_layout.addWidget(lbl_cliente)
+
+        # 3. Línea Central: Fecha Formateada y Total
         info_layout = QHBoxLayout()
-        date_label = QLabel(f"Fecha de emisión: {factura.get('fecha_emision', '-')}")
+        
+        fecha_raw = factura.get('fecha_emision', '')
+        if fecha_raw:
+            try:
+                clean_date = str(fecha_raw).replace('Z', '').split('.')[0]
+                dt = datetime.fromisoformat(clean_date)
+                fecha_text = dt.strftime("%d/%m/%Y %H:%M hs")
+            except Exception:
+                fecha_text = str(fecha_raw)
+        else:
+            fecha_text = "-"
+
+        date_label = QLabel(f"📅 Fecha: {fecha_text}")
         date_label.setObjectName("meta_info_factura")
         
-        total_label = QLabel(f"Total: ${factura.get('total', 0)}")
+        total_label = QLabel(f"Total: ${float(factura.get('total', 0)):.2f}")
         total_label.setObjectName("total_factura")
         
         info_layout.addWidget(date_label)
@@ -119,7 +148,7 @@ class FacturaView(QWidget):
         info_layout.addWidget(total_label)
         card_layout.addLayout(info_layout)
 
-        # Desglose de Productos
+        # 4. Desglose de Productos
         if factura.get('detalles'):
             prod_container = QWidget()
             prod_container.setStyleSheet("background-color: #f8f9fa; border-radius: 4px; padding: 5px;")
@@ -129,19 +158,20 @@ class FacturaView(QWidget):
 
             for detalle in factura['detalles']:
                 product = detalle.get('producto', {})
-                product_name = product.get('nombre', 'Producto')
+                product_name = product.get('nombre', 'Producto') if isinstance(product, dict) else f"Prod ID: {product}"
                 cantidad = detalle.get('cantidad', 0)
                 subtotal = detalle.get('subtotal', 0)
                 
-                detail_line = QLabel(f"• {product_name} x{cantidad}  —  Subtotal: ${subtotal}")
+                detail_line = QLabel(f"• {product_name} x{cantidad}  —  Subtotal: ${float(subtotal):.2f}")
                 detail_line.setObjectName("meta_info_factura")
                 prod_layout.addWidget(detail_line)
                 
             card_layout.addWidget(prod_container)
 
-        # Línea Inferior: Acciones de Caja
+        # 5. Línea Inferior: Acciones de Caja
         actions_layout = QHBoxLayout()
         btn_pagos = QPushButton("Administrar Pagos")
+        btn_pagos.setObjectName("btn_pagos")
         btn_pagos.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_pagos.clicked.connect(lambda _, f=factura: self.abrir_pagos(f))
         

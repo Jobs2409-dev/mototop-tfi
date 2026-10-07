@@ -1,4 +1,5 @@
 # desktop/app/components/pedido_card.py
+from datetime import datetime
 from PyQt6.QtWidgets import (
     QWidget,
     QVBoxLayout,
@@ -8,7 +9,6 @@ from PyQt6.QtWidgets import (
     QHBoxLayout
 )
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QFont
 
 from components.factura_dialog import FacturaDialog
 from style.components.pedido_card_styles import ESTILO_CARD_PEDIDO
@@ -26,39 +26,38 @@ class PedidoCard(QWidget):
         # 1. Aplicamos la hoja de estilos unificada
         self.setStyleSheet(ESTILO_CARD_PEDIDO)
 
-        # 2. Layout Raíz (Único layout asignado al componente base de la tarjeta)
+        # 2. Layout Raíz
         root_layout = QVBoxLayout()
-        root_layout.setContentsMargins(0, 4, 0, 4) # Margen sutil entre tarjetas
+        root_layout.setContentsMargins(0, 4, 0, 4)
         self.setLayout(root_layout)
 
         # 3. Marco físico contenedor de la tarjeta
         self.card_frame = QWidget()
         self.card_frame.setObjectName("contenedor_card")
         
-        # El layout interno donde se meten todos los datos reales
         card_layout = QVBoxLayout(self.card_frame)
         card_layout.setContentsMargins(15, 15, 15, 15)
         card_layout.setSpacing(10)
 
-        # --- PRIMERA LÍNEA: ID, CLIENTE, ESTADO ---
+        # ==========================================
+        # PRIMERA LÍNEA: ID, CLIENTE, ESTADO
+        # ==========================================
         header_layout = QHBoxLayout()
         
         id_label = QLabel(f"Pedido #{pedido['id']}")
         id_label.setObjectName("id_pedido")
         
-        # CONTROL DE SEGURIDAD: Validar si 'cliente' viene como diccionario o como ID entero
         cliente = pedido.get('cliente')
         if isinstance(cliente, dict):
             nombre_cliente = f"{cliente.get('nombre', '')} {cliente.get('apellido','')}".strip()
-        elif isinstance(cliente, int) or (isinstance(cliente, str) and cliente.isdigit()):
-            nombre_cliente = f"Cliente ID: {cliente} (Refrescar para ver)"
+        elif isinstance(cliente, int) or (isinstance(cliente, str) and str(cliente).isdigit()):
+            nombre_cliente = f"Cliente ID: {cliente}"
         else:
             nombre_cliente = "Cliente no especificado"
 
         cliente_label = QLabel(nombre_cliente)
         cliente_label.setObjectName("cliente_pedido")
         
-        # CONTROL DE SEGURIDAD: Evitar KeyError si 'estado' no viene en la respuesta del POST
         estado_raw = pedido.get('estado', 'pendiente')
         estado = estado_raw.lower() if estado_raw else 'pendiente'
         
@@ -72,28 +71,51 @@ class PedidoCard(QWidget):
         header_layout.addStretch()
         card_layout.addLayout(header_layout)
         
-        # --- SEGUNDA LÍNEA: VENDEDOR, ORIGEN, FECHA, TOTAL ---
+        # ==========================================
+        # SEGUNDA LÍNEA: VENDEDOR, ORIGEN, FECHA, TOTAL
+        # ==========================================
         details_layout = QHBoxLayout()
         
-        # CONTROL DE SEGURIDAD: Vendedor defensivo
+        # Identificación comercial del vendedor / canal
+        # Identificación comercial del vendedor / canal
         vendedor = pedido.get('vendedor')
+        origen_raw = pedido.get('origen', 'N/A')
+        origen_str = str(origen_raw).lower()
+
         if isinstance(vendedor, dict):
-            vendedor_text = f"{vendedor.get('nombre', '')} {vendedor.get('apellido','')}".strip()
+            vendedor_text = f"{vendedor.get('nombre', '')} {vendedor.get('apellido', '')}".strip()
         elif vendedor is not None:
-            vendedor_text = f"Vendedor ID: {vendedor}"
+            vendedor_text = f"Vendedor #{vendedor}"
+        elif origen_str == 'web':
+            vendedor_text = "Tienda Online (Portal Web)"
+        elif origen_str == 'local':
+            vendedor_text = "MOTO-TOP (Casa Central)"
         else:
-            vendedor_text = "Sin vendedor"
+            vendedor_text = "Venta Directa"
 
         vendedor_label = QLabel(f"Vend: {vendedor_text}")
         vendedor_label.setObjectName("meta_info")
 
-        origen_label = QLabel(f"Origen: {pedido.get('origen', 'N/A')}")
+        # Etiqueta de Origen
+        origen_label = QLabel(f"Origen: {str(origen_raw).capitalize()}")
         origen_label.setObjectName("meta_info")
-        
-        fecha_label = QLabel(f"{pedido.get('fecha_pedido', '')}")
+
+        # Formateo legible de fecha y hora
+        fecha_raw = pedido.get('fecha_pedido', '')
+        if fecha_raw:
+            try:
+                clean_date = str(fecha_raw).replace('Z', '').split('.')[0]
+                dt = datetime.fromisoformat(clean_date)
+                fecha_text = dt.strftime("%d/%m/%Y %H:%M hs")
+            except Exception:
+                fecha_text = str(fecha_raw)
+        else:
+            fecha_text = "-"
+
+        fecha_label = QLabel(f"📅 {fecha_text}")
         fecha_label.setObjectName("meta_info")
         
-        total_label = QLabel(f"Total: ${pedido.get('total', '0.00')}")
+        total_label = QLabel(f"Total: ${float(pedido.get('total', 0)):.2f}")
         total_label.setObjectName("total_pedido")
 
         details_layout.addWidget(vendedor_label)
@@ -103,7 +125,9 @@ class PedidoCard(QWidget):
         details_layout.addWidget(total_label)
         card_layout.addLayout(details_layout)
 
-        # --- TERCERA LÍNEA: DETALLE DE PRODUCTOS ---
+        # ==========================================
+        # TERCERA LÍNEA: DETALLE DE PRODUCTOS
+        # ==========================================
         if pedido.get('detalles'):
             productos_layout = QHBoxLayout()
             productos_text = []
@@ -120,7 +144,9 @@ class PedidoCard(QWidget):
             productos_layout.addWidget(productos_label)
             card_layout.addLayout(productos_layout)
 
-        # --- CUARTA LÍNEA: ACCIONES DISPONIBLES ---
+        # ==========================================
+        # CUARTA LÍNEA: ACCIONES DISPONIBLES
+        # ==========================================
         actions_layout = QHBoxLayout()
         actions_layout.setSpacing(8)
 
@@ -157,59 +183,57 @@ class PedidoCard(QWidget):
             actions_layout.addStretch()
             card_layout.addLayout(actions_layout)
 
-        # 4. Inyección final: Metemos la tarjeta física dentro del layout raíz
         root_layout.addWidget(self.card_frame)
-    
-    # --- MÉTODOS OPERATIVOS ---
-    # --- REEMPLAZAR MÉTODO COMPLETADO EN pedido_card.py ---
-    def confirmar_pedido(self):
-        # 1. Preguntar primero (Bloquea la ejecución hasta que el usuario elija)
-        generar = QMessageBox.question(
-            self,
-            "Confirmar pedido",
-            "¿Está seguro de que desea confirmar este pedido?",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
-        )
 
-        # 2. Si la respuesta NO es "Yes", frenamos la ejecución inmediatamente
-        if generar != QMessageBox.StandardButton.Yes:
+    # ==========================================
+    # MÉTODOS OPERATIVOS
+    # ==========================================
+    def confirmar_pedido(self):
+        box = QMessageBox(self)
+        box.setWindowTitle("Confirmar Pedido")
+        box.setText("¿Está seguro de que desea confirmar este pedido?")
+        btn_si = box.addButton("Sí", QMessageBox.ButtonRole.YesRole)
+        btn_no = box.addButton("No", QMessageBox.ButtonRole.NoRole)
+        box.exec()
+
+        if box.clickedButton() != btn_si:
             return
 
-        # 3. Solo si aceptó, procedemos con la petición al servidor Django
         try:
             self.service.confirmar(self.pedido['id'])
 
-            # Ofrecer la factura tras el éxito de la confirmación
-            facturar = QMessageBox.question(
-                self,
-                "Generar factura",
-                "Pedido confirmado de forma segura. ¿Desea generar la factura ahora?",
-                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
-            )
-
-            if facturar == QMessageBox.StandardButton.Yes:
-                self.generar_factura()
-            else:
+            # Si el pedido es local, facturamos directo en mostrador
+            if self.pedido.get('origen') == 'local':
+                self.service.generar_factura(self.pedido['id'])
                 QMessageBox.information(
-                    self,
-                    "Pedido confirmado",
-                    "El pedido se confirmó sin generar factura."
+                    self, 
+                    "Venta Concretada", 
+                    "Pedido confirmado y Factura generada automáticamente."
                 )
+            else:
+                box_factura = QMessageBox(self)
+                box_factura.setWindowTitle("Generar Factura")
+                box_factura.setText("Pedido confirmado. ¿Desea generar la factura comercial ahora?")
+                btn_fact_si = box_factura.addButton("Sí", QMessageBox.ButtonRole.YesRole)
+                btn_fact_no = box_factura.addButton("No", QMessageBox.ButtonRole.NoRole)
+                box_factura.exec()
+
+                if box_factura.clickedButton() == btn_fact_si:
+                    self.generar_factura()
 
             self.refresh()
         except Exception as e:
             QMessageBox.critical(self, "Error", f"No se pudo confirmar el pedido: {e}")
-            
-            
-    def cancelar_pedido(self):
-        confirm = QMessageBox.question(
-            self,
-            "Cancelar pedido",
-            "¿Está seguro de que desea cancelar este pedido?",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
-        )
 
-        if confirm != QMessageBox.StandardButton.Yes:
+    def cancelar_pedido(self):
+        box = QMessageBox(self)
+        box.setWindowTitle("Cancelar Pedido")
+        box.setText("¿Está seguro de que desea cancelar este pedido?")
+        btn_si = box.addButton("Sí", QMessageBox.ButtonRole.YesRole)
+        btn_no = box.addButton("No", QMessageBox.ButtonRole.NoRole)
+        box.exec()
+
+        if box.clickedButton() != btn_si:
             return
 
         try:
@@ -242,4 +266,3 @@ class PedidoCard(QWidget):
             dialog.exec()
         except Exception as e:
             QMessageBox.critical(self, "Error", f"No se pudo cargar la factura: {e}")
-            

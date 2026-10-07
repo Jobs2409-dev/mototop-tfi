@@ -1,4 +1,5 @@
 # desktop/app/components/factura_dialog.py
+from datetime import datetime
 from PyQt6.QtWidgets import (
     QDialog,
     QVBoxLayout,
@@ -23,6 +24,24 @@ class FacturaDialog(QDialog):
         layout.setContentsMargins(20, 20, 20, 20)
         layout.setSpacing(12)
 
+
+        # Formateo de fecha de emisión
+        fecha_emision_raw = factura.get('fecha_emision', '-')
+        if fecha_emision_raw != '-':
+            try:
+                clean_date = fecha_emision_raw.replace('Z', '').split('.')[0]
+                dt = datetime.fromisoformat(clean_date)
+                fecha_emision_text = dt.strftime("%d/%m/%Y %H:%M hs")
+            except Exception:
+                fecha_emision_text = fecha_emision_raw
+        else:
+            fecha_emision_text = '-'
+
+        date_label = QLabel(f"Fecha de emisión: {fecha_emision_text}")
+        date_label.setStyleSheet("color: #718096;")
+        layout.addWidget(date_label)
+
+
         # Cabecera de diálogo
         title = QLabel(f"Factura #{factura['id']}  —  Pedido #{factura['pedido']}")
         title.setObjectName("title_dialog")
@@ -33,10 +52,7 @@ class FacturaDialog(QDialog):
         status_label.setStyleSheet("font-weight: 600; color: #4a5568;")
         layout.addWidget(status_label)
 
-        date_label = QLabel(f"Fecha de emisión: {factura.get('fecha_emision', '-')}")
-        date_label.setStyleSheet("color: #718096;")
-        layout.addWidget(date_label)
-
+    
         total_label = QLabel(f"Monto Total Recaudado: ${factura.get('total', 0)}")
         total_label.setObjectName("total_dialog")
         layout.addWidget(total_label)
