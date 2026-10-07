@@ -87,7 +87,22 @@ class ProductoCard(QWidget):
         nombre.setObjectName("product_title")
         nombre.setWordWrap(True)
         layout.addWidget(nombre)
-
+        
+        # Mostrar Rubros asociados
+        rubros = producto.get("rubros", [])
+        nombres_rubros = ", ".join([r["nombre"] for r in rubros if isinstance(r, dict)]) or "Sin rubro"
+        lbl_rubros = QLabel(f"🏷️ {nombres_rubros}")
+        lbl_rubros.setObjectName("product_rubros")
+        layout.addWidget(lbl_rubros)
+        
+        # Mostrar Proveedores asociados
+        proveedores = producto.get("proveedores", [])
+        nombres_prov = ", ".join([p["nombre"] for p in proveedores if isinstance(p, dict)]) or "Sin proveedor"
+        lbl_prov = QLabel(f"🏭 {nombres_prov}")
+        lbl_prov.setObjectName("product_proveedores")
+        layout.addWidget(lbl_prov)
+        
+        
         lbl_id = QLabel(f"ID: {producto['id']}")
         lbl_id.setObjectName("product_id")
         layout.addWidget(lbl_id)
@@ -203,10 +218,12 @@ class ProductoCard(QWidget):
             QMessageBox.critical(self, "Error", str(e))
 
     def delete(self):
+        nombre_prod = self.producto.get("nombre", "este producto")
+
         box = QMessageBox(self)
         box.setIcon(QMessageBox.Icon.Question)
-        box.setWindowTitle("Confirmar")
-        box.setText(f"¿Eliminar {self.producto['nombre']}?")
+        box.setWindowTitle("Confirmar Eliminación")
+        box.setText(f"¿Está seguro de que desea eliminar el producto '{nombre_prod}'?")
         box.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         box.setStyleSheet(ESTILO_CONFIRM_DIALOG)
 

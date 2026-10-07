@@ -49,6 +49,20 @@ def get_producto_card_style(object_name: str, tiene_promocion: bool) -> str:
             padding: 4px;
             border-radius: 4px;
         }}
+        
+        QLabel#product_rubros {{
+            font-size: 11px;
+            color: #64748b;
+            font-weight: 500;
+            padding-bottom: 2px;
+        }}
+        
+        QLabel#product_proveedores {{
+            font-size: 11px;
+            color: #475569;
+            font-weight: 500;
+            padding-bottom: 2px;
+        }}
 
         QPushButton {{
             border: none;

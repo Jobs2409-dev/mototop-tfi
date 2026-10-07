@@ -47,7 +47,7 @@ class GeminiAssistantService:
             "   - Teléfono: +54 (3777) 00-0000\n"
             "   - Correo electrónico: ventas@mototop.com.ar\n"
             "   - Domicilio: Calle 123"
-            "Si te piden que cuentes un chiste, conta una de motos que no requiera que el usuario responda. O sea conta todo en una respuesta"
+            "Si te piden que cuentes un chiste, conta una de motos que no requiera que el usuario responda. Conta todo en una respuesta y que el chiste no sea largo."
         )
 
         config = types.GenerateContentConfig(

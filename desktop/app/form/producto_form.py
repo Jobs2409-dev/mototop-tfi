@@ -5,6 +5,8 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt
 
+from style.form.producto_form_styles import ESTILO_PRODUCTO_FORM
+
 
 class ProductoForm(QWidget):
 
@@ -21,6 +23,8 @@ class ProductoForm(QWidget):
 
         self.setWindowTitle("Editar Producto" if self.producto else "Nuevo Producto")
         self.resize(550, 750)
+        self.setObjectName("producto_form_window")
+        self.setStyleSheet(ESTILO_PRODUCTO_FORM)
 
         # Layout Principal General
         main_layout = QVBoxLayout()
@@ -37,7 +41,6 @@ class ProductoForm(QWidget):
         self.nombre = QLineEdit()
         self.nombre.setPlaceholderText("Nombre del producto")
 
-        # Layout horizontal para campos numéricos cortos
         numeric_layout = QHBoxLayout()
         self.precio = QLineEdit()
         self.precio.setPlaceholderText("Precio base ($)")
@@ -64,7 +67,7 @@ class ProductoForm(QWidget):
         main_layout.addLayout(img_layout)
 
         # =========================
-        # SECCIÓN SELECCIÓN DE LISTAS (Siempre visibles)
+        # SECCIÓN SELECCIÓN DE LISTAS
         # =========================
         main_layout.addWidget(QLabel("Asignar Rubros (Selección múltiple):"))
         self.rubros_list = QListWidget()
@@ -98,11 +101,11 @@ class ProductoForm(QWidget):
         main_layout.addLayout(toggle_layout)
 
         # =========================
-        # CONTENEDOR OCULTO: NUEVO RUBRO
+        # PANEL OCULTO: NUEVO RUBRO
         # =========================
         self.panel_rubro = QWidget()
         self.panel_rubro.setObjectName("sub_panel")
-        self.panel_rubro.setVisible(False)  # Oculto por defecto
+        self.panel_rubro.setVisible(False)
         
         rubro_layout = QVBoxLayout(self.panel_rubro)
         rubro_layout.setContentsMargins(10, 10, 10, 10)
@@ -131,11 +134,11 @@ class ProductoForm(QWidget):
         main_layout.addWidget(self.panel_rubro)
 
         # =========================
-        # CONTENEDOR OCULTO: NUEVO PROVEEDOR
+        # PANEL OCULTO: NUEVO PROVEEDOR
         # =========================
         self.panel_proveedor = QWidget()
         self.panel_proveedor.setObjectName("sub_panel")
-        self.panel_proveedor.setVisible(False)  # Oculto por defecto
+        self.panel_proveedor.setVisible(False)
         
         prov_layout = QVBoxLayout(self.panel_proveedor)
         prov_layout.setContentsMargins(10, 10, 10, 10)
@@ -145,21 +148,14 @@ class ProductoForm(QWidget):
         prov_layout.addWidget(lbl_p)
 
         self.prov_nombre = QLineEdit()
-        self.prov_nombre.setPlaceholderText("Nombre")
-        self.prov_apellido = QLineEdit()
-        self.prov_apellido.setPlaceholderText("Apellido")
-        
-        prov_h1 = QHBoxLayout()
-        prov_h1.addWidget(self.prov_nombre)
-        prov_h1.addWidget(self.prov_apellido)
-        prov_layout.addLayout(prov_h1)
+        self.prov_nombre.setPlaceholderText("Razón Social / Nombre")
+        prov_layout.addWidget(self.prov_nombre)
 
+        prov_h2 = QHBoxLayout()
         self.prov_tel = QLineEdit()
         self.prov_tel.setPlaceholderText("Teléfono")
         self.prov_email = QLineEdit()
         self.prov_email.setPlaceholderText("Email")
-        
-        prov_h2 = QHBoxLayout()
         prov_h2.addWidget(self.prov_tel)
         prov_h2.addWidget(self.prov_email)
         prov_layout.addLayout(prov_h2)
@@ -191,23 +187,19 @@ class ProductoForm(QWidget):
 
         self.setLayout(main_layout)
 
-        # Aplicar estilos visuales unificados
-        self.apply_custom_styles()
-
-        # Cargar colecciones de datos
+        # Cargar opciones y datos existentes si es edición
         self.load_options()
 
         if self.producto:
             self.load_producto()
 
     # =========================
-    # LÓGICA DE INTERRUPCIÓN (SHOW / HIDE)
+    # LÓGICA DE PANELES OCULTOS
     # =========================
     def toggle_rubro_panel(self, checked):
         self.panel_rubro.setVisible(checked)
         if checked:
             self.btn_toggle_rubro.setText("- Ocultar Rubros")
-            # Cierra el panel opuesto para no romper la proporción vertical
             self.btn_toggle_prov.setChecked(False)
             self.panel_proveedor.setVisible(False)
             self.btn_toggle_prov.setText("+ Administrar Proveedores")
@@ -218,7 +210,6 @@ class ProductoForm(QWidget):
         self.panel_proveedor.setVisible(checked)
         if checked:
             self.btn_toggle_prov.setText("- Ocultar Proveedores")
-            # Cierra el panel opuesto
             self.btn_toggle_rubro.setChecked(False)
             self.panel_rubro.setVisible(False)
             self.btn_toggle_rubro.setText("+ Administrar Rubros")
@@ -226,122 +217,7 @@ class ProductoForm(QWidget):
             self.btn_toggle_prov.setText("+ Administrar Proveedores")
 
     # =========================
-    # ESTILOS DEL COMPONENTE (QSS)
-    # =========================
-    def apply_custom_styles(self):
-        self.setStyleSheet("""
-            QWidget {
-                background-color: #f5f6f8;
-                font-family: 'Segoe UI', Arial, sans-serif;
-                color: #2c3e50;
-            }
-            
-            QLabel {
-                font-size: 13px;
-                font-weight: bold;
-                color: #4a5568;
-            }
-            
-            QLabel#section_title {
-                font-size: 18px;
-                font-weight: bold;
-                color: #1e1e24;
-                border-bottom: 2px solid #e53935;
-                padding-bottom: 5px;
-            }
-
-            QLabel#sub_title {
-                font-size: 13px;
-                color: #1e1e24;
-                font-weight: bold;
-            }
-            
-            QLineEdit {
-                background-color: #ffffff;
-                border: 1px solid #cbd5e1;
-                border-radius: 5px;
-                padding: 8px 12px;
-                font-size: 13px;
-            }
-            
-            QLineEdit:focus {
-                border: 1px solid #e53935;
-            }
-            
-            QListWidget {
-                background-color: #ffffff;
-                border: 1px solid #cbd5e1;
-                border-radius: 5px;
-                padding: 5px;
-            }
-            
-            QListWidget::item {
-                padding: 6px;
-                border-bottom: 1px solid #f1f5f9;
-            }
-            
-            QListWidget::item:selected {
-                background-color: #e53935;
-                color: #ffffff;
-                border-radius: 3px;
-            }
-
-            /* Paneles Ocultables */
-            QWidget#sub_panel {
-                background-color: #eaf0f6;
-                border: 1px solid #d1d5db;
-                border-radius: 6px;
-            }
-            
-            /* Botones */
-            QPushButton {
-                font-weight: bold;
-                font-size: 13px;
-                border-radius: 5px;
-                padding: 8px 15px;
-            }
-            
-            QPushButton#toggle_button {
-                background-color: #e2e8f0;
-                color: #475569;
-                border: 1px solid #cbd5e1;
-            }
-            QPushButton#toggle_button:checked {
-                background-color: #475569;
-                color: #ffffff;
-            }
-
-            QPushButton#secondary_button {
-                background-color: #1e1e24;
-                color: #ffffff;
-            }
-            
-            QPushButton#main_save_button {
-                background-color: #e53935;
-                color: #ffffff;
-                font-size: 14px;
-                padding: 12px;
-            }
-            QPushButton#main_save_button:hover {
-                background-color: #d32f2f;
-            }
-
-            QPushButton#action_green {
-                background-color: #2ecc71;
-                color: #ffffff;
-                font-size: 12px;
-                padding: 6px;
-            }
-            QPushButton#action_red {
-                background-color: #e74c3c;
-                color: #ffffff;
-                font-size: 12px;
-                padding: 6px;
-            }
-        """)
-
-    # =========================
-    # CARGA DE DATOS ORIGINAL
+    # CARGA DE DATOS
     # =========================
     def load_options(self):
         try:
@@ -387,13 +263,13 @@ class ProductoForm(QWidget):
                 return
 
     # =========================
-    # LOGICA OPERATIVA DE RUBROS
+    # GESTIÓN DE RUBROS
     # =========================
     def create_rubro(self):
         try:
             nombre = self.rubro_input.text().strip()
             if not nombre:
-                raise ValueError("Nombre obligatorio")
+                raise ValueError("Debe ingresar el nombre del nuevo rubro.")
 
             rubro_creado = self.rubro_service.crear({"nombre": nombre})
             self.rubro_input.clear()
@@ -401,41 +277,43 @@ class ProductoForm(QWidget):
             if rubro_creado.get("id") is not None:
                 self.select_item_by_id(self.rubros_list, rubro_creado["id"])
 
+        except ValueError as ve:
+            QMessageBox.warning(self, "Validación requerida", str(ve))
         except Exception as e:
             QMessageBox.critical(self, "Error", str(e))
 
     def delete_rubro(self):
         try:
             if not self.rubros_list.selectedItems():
-                raise ValueError("Seleccione un elemento de la lista superior para eliminarlo")
+                raise ValueError("Seleccione al menos un rubro para eliminar.")
                 
             for item in self.rubros_list.selectedItems():
                 self.rubro_service.eliminar(item.data(1))
 
             self.refresh_lists()
 
+        except ValueError as ve:
+            QMessageBox.warning(self, "Validación requerida", str(ve))
         except Exception as e:
             QMessageBox.critical(self, "Error", str(e))
 
     # =========================
-    # LOGICA OPERATIVA DE PROVEEDORES
+    # GESTIÓN DE PROVEEDORES
     # =========================
     def create_proveedor(self):
         try:
+            nombre = self.prov_nombre.text().strip()
+            if not nombre:
+                raise ValueError("Debe ingresar la Razón Social o Nombre del proveedor.")
+
             data = {
-                "nombre": self.prov_nombre.text().strip(),
-                "apellido": self.prov_apellido.text().strip(),
+                "nombre": nombre,
                 "telefono": self.prov_tel.text().strip(),
                 "email": self.prov_email.text().strip(),
             }
 
-            if not data["nombre"]:
-                raise ValueError("Nombre obligatorio")
-
             proveedor_creado = self.proveedor_service.crear(data)
-
             self.prov_nombre.clear()
-            self.prov_apellido.clear()
             self.prov_tel.clear()
             self.prov_email.clear()
 
@@ -443,24 +321,28 @@ class ProductoForm(QWidget):
             if proveedor_creado.get("id") is not None:
                 self.select_item_by_id(self.prov_list, proveedor_creado["id"])
 
+        except ValueError as ve:
+            QMessageBox.warning(self, "Validación requerida", str(ve))
         except Exception as e:
             QMessageBox.critical(self, "Error", str(e))
 
     def delete_proveedor(self):
         try:
             if not self.prov_list.selectedItems():
-                raise ValueError("Seleccione un elemento de la lista superior para eliminarlo")
+                raise ValueError("Seleccione al menos un proveedor para eliminar.")
 
             for item in self.prov_list.selectedItems():
                 self.proveedor_service.eliminar(item.data(1))
 
             self.refresh_lists()
 
+        except ValueError as ve:
+            QMessageBox.warning(self, "Validación requerida", str(ve))
         except Exception as e:
             QMessageBox.critical(self, "Error", str(e))
 
     # =========================
-    # IMAGEN
+    # GESTIÓN DE IMAGEN
     # =========================
     def select_image(self):
         file, _ = QFileDialog.getOpenFileName(
@@ -468,27 +350,69 @@ class ProductoForm(QWidget):
         )
         if file:
             self.image_path = file
-            self.lbl_img.setText(file.split("/")[-1])  # Muestra solo el nombre del archivo final
+            self.lbl_img.setText(file.split("/")[-1])
 
     # =========================
-    # GUARDAR DEFINITIVO
+    # VALIDACIONES Y GUARDADO
     # =========================
+    def validate_inputs(self):
+        nombre = self.nombre.text().strip()
+        if not nombre:
+            raise ValueError("Debe ingresar el nombre del producto.")
+
+        # 1. Validación de Precio
+        precio_str = self.precio.text().strip().replace(",", ".")
+        if not precio_str:
+            raise ValueError("Debe ingresar un precio base.")
+        
+        try:
+            precio = float(precio_str)
+        except ValueError:
+            raise ValueError("El precio debe ser un número válido (ej: 14500.50).")
+
+        if precio <= 0:
+            raise ValueError("El precio debe ser mayor a 0.")
+
+        # 2. Validación de Stock
+        stock_str = self.stock.text().strip()
+        if not stock_str:
+            raise ValueError("Debe ingresar el stock.")
+        
+        try:
+            stock = int(stock_str)
+        except ValueError:
+            raise ValueError("El stock debe ser un número entero (ej: 25).")
+
+        # Regla: No permitir stock negativo
+        if stock < 0:
+            raise ValueError("El stock no puede ser negativo.")
+
+        # Si tampoco querés permitir stock en 0 al dar de alta:
+        if stock == 0:
+            raise ValueError("El stock debe ser mayor a 0.")
+
+        # 3. Asignación de Rubros y Proveedores
+        rubros = self.get_selected_ids(self.rubros_list)
+        if not rubros:
+            raise ValueError("Debe asignar al menos un rubro al producto.")
+
+        proveedores = self.get_selected_ids(self.prov_list)
+        if not proveedores:
+            raise ValueError("Debe asignar al menos un proveedor al producto.")
+
+        return nombre, precio, stock, rubros, proveedores
+
     def save(self):
         file_obj = None
         try:
-            nombre = self.nombre.text().strip()
-            precio = float(self.precio.text())
-            stock = int(self.stock.text())
-
-            if not nombre:
-                raise ValueError("Nombre obligatorio")
+            nombre, precio, stock, rubros, proveedores = self.validate_inputs()
 
             data = {
                 "nombre": nombre,
                 "precio_base": precio,
                 "stock": stock,
-                "rubros": self.get_selected_ids(self.rubros_list),
-                "proveedores": self.get_selected_ids(self.prov_list),
+                "rubros": rubros,
+                "proveedores": proveedores,
             }
 
             files = None
@@ -498,16 +422,16 @@ class ProductoForm(QWidget):
 
             if self.producto:
                 self.producto_service.actualizar(self.producto["id"], data, files)
-                QMessageBox.information(self, "OK", "Producto actualizado")
+                QMessageBox.information(self, "Operación Exitosa", "Producto actualizado correctamente.")
             else:
                 self.producto_service.crear(data, files)
-                QMessageBox.information(self, "OK", "Producto creado")
+                QMessageBox.information(self, "Operación Exitosa", "Producto registrado correctamente.")
 
             self.on_success()
             self.close()
 
         except ValueError as ve:
-            QMessageBox.warning(self, "Validación", str(ve))
+            QMessageBox.warning(self, "Validación requerida", str(ve))
         except Exception as e:
             QMessageBox.critical(self, "Error", str(e))
         finally:
@@ -520,17 +444,17 @@ class ProductoForm(QWidget):
     def load_producto(self):
         p = self.producto
 
-        self.nombre.setText(p["nombre"])
-        self.precio.setText(str(p["precio_base"]))
-        self.stock.setText(str(p["stock"]))
+        self.nombre.setText(p.get("nombre", ""))
+        self.precio.setText(str(p.get("precio_base", "")))
+        self.stock.setText(str(p.get("stock", "")))
 
-        rubro_ids = [r["id"] for r in p.get("rubros", [])]
+        rubro_ids = [r["id"] for r in p.get("rubros", []) if isinstance(r, dict)]
         for i in range(self.rubros_list.count()):
             item = self.rubros_list.item(i)
             if item.data(1) in rubro_ids:
                 item.setSelected(True)
 
-        prov_ids = [pr["id"] for pr in p.get("proveedores", [])]
+        prov_ids = [pr["id"] for pr in p.get("proveedores", []) if isinstance(pr, dict)]
         for i in range(self.prov_list.count()):
             item = self.prov_list.item(i)
             if item.data(1) in prov_ids:
