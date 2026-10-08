@@ -345,7 +345,6 @@ class DetalleFactura(models.Model):
     
 # Pago
 class Pago(models.Model):
-
     METODO_CHOICES = [
         ('efectivo', 'Efectivo'),
         ('transferencia', 'Transferencia'),
@@ -359,47 +358,32 @@ class Pago(models.Model):
     ]
 
     factura = models.ForeignKey(Factura, on_delete=models.CASCADE, related_name='pagos')
-
     monto = models.DecimalField(max_digits=10, decimal_places=2)
     metodo_pago = models.CharField(max_length=20, choices=METODO_CHOICES)
-    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='procesando')
+    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='completado') # <-- Default completado
 
     fecha_pago = models.DateTimeField(auto_now_add=True)
     referencia = models.CharField(max_length=100, blank=True, null=True)
-    
+
     def clean(self):
-        # Validar que el monto no supere el pendiente
-        if self.estado == 'completado':
-            pendiente = self.factura.calcular_pendiente()
-            
-            if self.id:
-                # Si es una actualización, excluir este pago del cálculo
-                pendiente += self.monto
-            
-            if self.monto > pendiente:
-                raise ValidationError(
-                    f"El monto no puede superar lo pendiente por pagar (${pendiente})"
-                )
-        
-        if self.monto <= 0:
+        if self.monto is None or self.monto <= 0:
             raise ValidationError("El monto debe ser mayor a 0")
 
+        # Validar que el monto no supere lo pendiente
+        pendiente = self.factura.calcular_pendiente()
+        if self.id and self.estado == 'completado':
+            pendiente += self.monto
+
+        if self.monto > pendiente:
+            raise ValidationError(
+                f"El monto (${self.monto}) no puede superar lo pendiente por pagar (${pendiente})"
+            )
 
     def save(self, *args, **kwargs):
-        # 1. Ejecuta las validaciones
         self.full_clean()
-        
-        # 2. Guarda el pago en la base de datos
         super().save(*args, **kwargs)
-        
-        # 3. Fuerza a la factura a recalcularse y guardarse para reflejar el nuevo saldo
         if self.factura:
-            # Al guardar la factura, Django actualizará los métodos calculados del Serializer
             self.factura.save()
-            
-
-    def __str__(self):
-        return f"Pago #{self.id} - {self.factura}"
     
 # Envio
 class Envio(models.Model):

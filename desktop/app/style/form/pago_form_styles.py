@@ -1,53 +1,70 @@
 QSS_STYLE = """
-    QDialog {
-        background-color: #1a1a1a;
+    QWidget {
+        background-color: #f8f9fa;
         font-family: 'Segoe UI', Arial, sans-serif;
         font-size: 13px;
-        color: #ffffff;
+        color: #212529;
     }
+    
+    #lbl_factura {
+        font-size: 14px;
+        font-weight: bold;
+        color: #d93025;
+        background-color: #fce8e6;
+        border: 1px solid #f8c2c0;
+        border-left: 5px solid #ea4335;
+        border-radius: 6px;
+        padding: 10px 14px;
+    }
+    
     QLabel {
-        font-weight: bold;
-        color: #cccccc;
+        font-weight: 600;
+        color: #3c4043;
     }
-    QLabel#lbl_factura {
-        font-size: 14px;
-        color: #ffffff;
-        background-color: #262626;
-        padding: 8px;
-        border-left: 3px solid #dc3545;
-        border-radius: 2px;
-        margin-bottom: 5px;
+    
+    QLineEdit, QComboBox, QDateEdit, QDoubleSpinBox {
+        background-color: #ffffff;
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        padding: 8px 10px;
+        font-size: 13px;
+        color: #212529;
     }
-    QLineEdit, QComboBox, QDoubleSpinBox {
-        background-color: #262626;
-        border: 1px solid #333333;
-        border-radius: 4px;
-        padding: 6px;
-        color: #ffffff;
-        min-height: 20px;
+    
+    QLineEdit:focus, QComboBox:focus, QDateEdit:focus, QDoubleSpinBox:focus {
+        border: 2px solid #ea4335;
+        background-color: #ffffff;
     }
-    QLineEdit:focus, QComboBox:focus, QDoubleSpinBox:focus {
-        border: 1px solid #dc3545;
+    
+    QComboBox::drop-down {
+        subcontrol-origin: padding;
+        subcontrol-position: top right;
+        width: 25px;
+        border-left-width: 0px;
+        border-top-right-radius: 6px;
+        border-bottom-right-radius: 6px;
     }
-    QComboBox QAbstractItemView {
-        background-color: #262626;
-        color: #ffffff;
-        selection-background-color: #dc3545;
-    }
+    
     QPushButton {
-        background-color: #dc3545;
-        color: white;
+        background-color: #ea4335;
+        color: #ffffff;
         border: none;
-        border-radius: 4px;
-        padding: 10px;
+        border-radius: 6px;
+        padding: 10px 18px;
         font-size: 14px;
         font-weight: bold;
-        margin-top: 10px;
     }
+    
     QPushButton:hover {
-        background-color: #bd2130;
+        background-color: #d93025;
     }
+    
     QPushButton:pressed {
-        background-color: #b02a37;
+        background-color: #b3261e;
+    }
+    
+    QPushButton:disabled {
+        background-color: #f1f3f4;
+        color: #bdc1c6;
     }
 """

@@ -210,6 +210,7 @@ class DetallePedidoReadSerializer(serializers.ModelSerializer):
     class Meta:
         model = DetallePedido
         fields = ['id', 'producto', 'cantidad', 'precio_unitario', 'subtotal']
+
 class PedidoWriteSerializer(serializers.ModelSerializer):
     detalles = DetallePedidoWriteSerializer(many=True, write_only=True)
 
@@ -238,6 +239,7 @@ class PedidoWriteSerializer(serializers.ModelSerializer):
             detalle_obj.save()
 
         return pedido
+
 
 # Pedido Serializer para lectura, que incluye detalles con información del producto y cliente con información completa
 class PedidoReadSerializer(serializers.ModelSerializer):
@@ -294,32 +296,43 @@ class PagoSerializer(serializers.ModelSerializer):
     def validate(self, data):
         factura = data.get('factura')
         monto = data.get('monto')
-        estado = data.get('estado')
+        # Si no envían estado, por defecto asume 'completado' (cobro inmediato)
+        estado = data.get('estado', 'completado')
+        
+        # Asignar el estado completado por defecto si no venía en los datos
+        data['estado'] = estado
 
         if self.instance:
             factura = factura or self.instance.factura
             monto = monto or self.instance.monto
             estado = estado or self.instance.estado
 
-        if monto <= 0:
+        if monto is None or monto <= 0:
             raise serializers.ValidationError(
-                "El monto debe ser mayor a 0"
+                "El monto a cobrar debe ser mayor a $0.00"
             )
 
-        # Si el estado es completado, validar que no supere el pendiente
-        if estado == 'completado':
-            pendiente = factura.calcular_pendiente()
-            
-            if self.instance:
-                # Si es una actualización, agregar el monto anterior al pendiente
-                pendiente += self.instance.monto
-            
-            if monto > pendiente:
-                raise serializers.ValidationError(
-                    f"El monto (${monto}) no puede superar lo pendiente por pagar (${pendiente})"
-                )
+        # Calculamos el saldo pendiente actual de la factura
+        pendiente = factura.calcular_pendiente()
+        
+        if self.instance and self.instance.estado == 'completado':
+            # Si se está editando un pago existente, sumamos su monto previo para recalcular correctamente
+            pendiente += self.instance.monto
+
+        # VALIDACIÓN STRICTA: El monto cobrado NUNCA puede superar el pendiente
+        if monto > pendiente:
+            raise serializers.ValidationError(
+                f"El monto a cobrar (${monto:.2f}) no puede superar el saldo pendiente de la factura (${pendiente:.2f})."
+            )
 
         return data
+
+    class Meta:
+        model = Pago
+        fields = ['id', 'factura', 'fecha_pago', 'monto', 'metodo_pago', 'estado', 'referencia']
+        extra_kwargs = {
+            'estado': {'required': False, 'default': 'completado'}
+        }
 
     class Meta:
         model = Pago
