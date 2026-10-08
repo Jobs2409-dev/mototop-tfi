@@ -7,7 +7,8 @@ from PyQt6.QtWidgets import (
     QTableWidget,
     QTableWidgetItem,
     QMessageBox,
-    QHeaderView
+    QHeaderView,
+    QAbstractItemView
 )
 
 from services.pedido_service import PedidoService
@@ -21,11 +22,7 @@ class EnvioView(QWidget):
         super().__init__()
 
         self.envio_service = envio_service
-
-        # Usamos el mismo cliente HTTP del servicio de envíos
-        self.pedido_service = PedidoService(
-            envio_service.http
-        )
+        self.pedido_service = PedidoService(envio_service.http)
 
         self.init_ui()
         self.cargar_datos()
@@ -38,7 +35,7 @@ class EnvioView(QWidget):
         layout.setContentsMargins(20, 20, 20, 20)
         layout.setSpacing(15)
 
-        # Botones
+        # Botones de Acción
         botones_layout = QHBoxLayout()
         botones_layout.setSpacing(8)
 
@@ -64,15 +61,15 @@ class EnvioView(QWidget):
             "Estado",
         ])
         
-        # Comportamiento visual moderno de la tabla
         self.table.setAlternatingRowColors(True)
         self.table.setShowGrid(True)
+        self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+        self.table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
+        self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         
-        # CORRECCIÓN AQUÍ: Uso correcto de ResizeMode en PyQt6
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
         self.table.horizontalHeader().setStretchLastSection(True)
 
-        # Layout
         layout.addLayout(botones_layout)
         layout.addWidget(self.table)
 
@@ -84,135 +81,87 @@ class EnvioView(QWidget):
         self.btn_editar.clicked.connect(self.editar_envio)
 
     def cargar_datos(self):
+        """Carga la lista de envíos mapeando clientes con una sola consulta a pedidos para no saturar la API."""
         try:
-            envios = self.envio_service.listar()
+            envios_res = self.envio_service.listar()
+            envios = envios_res.get("results", envios_res) if isinstance(envios_res, dict) else envios_res
 
-            if isinstance(envios, dict) and "results" in envios:
-                envios = envios["results"]
+            # Traer lista de pedidos en una sola petición para optimizar
+            pedidos_res = self.pedido_service.listar()
+            lista_pedidos = pedidos_res.get("results", pedidos_res) if isinstance(pedidos_res, dict) else pedidos_res
+            
+            # Crear mapa rápido por ID: {id: cliente_nombre}
+            mapa_pedidos = {}
+            for p in lista_pedidos:
+                cli = p.get("cliente", {})
+                if isinstance(cli, dict):
+                    nombre_cli = f"{cli.get('nombre', '')} {cli.get('apellido', '')}".strip()
+                else:
+                    nombre_cli = f"Cliente #{cli}"
+                mapa_pedidos[p["id"]] = nombre_cli
 
             self.table.setRowCount(len(envios))
 
             for row, envio in enumerate(envios):
-                pedido = envio.get("pedido")
-                empresa = envio.get("empresa_transporte", "")
-                tracking = envio.get("tracking_code") or ""
-                estado = envio.get("estado_envio", "")
+                pedido_id = envio.get("pedido")
+                
+                # Si 'pedido' viene como diccionario anidado desde el backend
+                if isinstance(pedido_id, dict):
+                    p_id_str = str(pedido_id.get("id"))
+                    cliente = mapa_pedidos.get(pedido_id.get("id"), "")
+                else:
+                    p_id_str = str(pedido_id)
+                    cliente = mapa_pedidos.get(pedido_id, "")
 
-                cliente = ""
-
-                try:
-                    pedido_data = self.pedido_service.obtener(pedido)
-                    cliente_data = pedido_data.get("cliente", {})
-                    nombre = cliente_data.get("nombre", "")
-                    apellido = cliente_data.get("apellido", "")
-                    cliente = f"{nombre} {apellido}".strip()
-                except Exception:
-                    cliente = ""
+                empresa = str(envio.get("empresa_transporte") or "")
+                tracking = str(envio.get("tracking_code") or "")
+                estado = str(envio.get("estado_envio") or "").upper()
 
                 self.table.setItem(row, 0, QTableWidgetItem(str(envio["id"])))
-                self.table.setItem(row, 1, QTableWidgetItem(str(pedido)))
+                self.table.setItem(row, 1, QTableWidgetItem(f"Pedido #{p_id_str}"))
                 self.table.setItem(row, 2, QTableWidgetItem(cliente))
                 self.table.setItem(row, 3, QTableWidgetItem(empresa))
-                self.table.setItem(row, 4, QTableWidgetItem(tracking))
+                self.table.setItem(row, 4, QTableWidgetItem(tracking if tracking else "-"))
                 self.table.setItem(row, 5, QTableWidgetItem(estado))
 
-            self.table.resizeColumnsToContents()
-
         except Exception as e:
-            QMessageBox.critical(
-                self,
-                "Error",
-                str(e)
-            )
+            QMessageBox.critical(self, "Error al Cargar Envíos", str(e))
 
     def crear_envio(self):
-        try:
-            # Obtener pedidos
-            pedidos = self.pedido_service.listar()
-
-            if isinstance(pedidos, dict) and "results" in pedidos:
-                pedidos = pedidos["results"]
-
-            # Filtrar solo pedidos confirmados
-            pedidos_confirmados = [
-                p for p in pedidos
-                if p["estado"] == "confirmado"
-            ]
-
-            # Obtener envíos existentes
-            envios = self.envio_service.listar()
-
-            if isinstance(envios, dict) and "results" in envios:
-                envios = envios["results"]
-
-            # IDs de pedidos que ya tienen envío
-            pedidos_con_envio = {
-                envio["pedido"]
-                for envio in envios
-            }
-
-            # Pedidos disponibles para crear envío
-            pedidos_disponibles = [
-                p for p in pedidos_confirmados
-                if p["id"] not in pedidos_con_envio
-            ]
-
-            if not pedidos_disponibles:
-                QMessageBox.information(
-                    self,
-                    "Información",
-                    "No hay pedidos confirmados sin envío."
-                )
-                return
-
-            self.select_pedido_window = SelectPedidoEnvioView(
-                pedidos=pedidos_disponibles,
-                on_select=self.abrir_formulario_envio
-            )
-            self.select_pedido_window.show()
-
-        except Exception as e:
-            QMessageBox.critical(
-                self,
-                "Error",
-                str(e)
-            )
+        dialog = EnvioForm(
+            envio_service=self.envio_service,
+            pedido_service=self.pedido_service,
+            parent=self
+        )
+        if dialog.exec():
+            self.cargar_datos()
 
     def abrir_formulario_envio(self, pedido):
-        
-
-        self.envio_form = EnvioForm(
+        dialog = EnvioForm(
             pedido=pedido,
             envio_service=self.envio_service,
             on_success=self.cargar_datos
         )
-        self.envio_form.show()
+        dialog.exec()
 
     def editar_envio(self):
         row = self.table.currentRow()
-
         if row < 0:
-            QMessageBox.warning(
-                self,
-                "Selección requerida",
-                "Debe seleccionar un envío."
-            )
+            QMessageBox.warning(self, "Selección Requerida", "Debe seleccionar un envío para editar.")
             return
 
-        envio_id = int(self.table.item(row, 0).text())
-        envio = self.envio_service.obtener(envio_id)
+        try:
+            envio_id = int(self.table.item(row, 0).text())
+            envio = self.envio_service.obtener(envio_id)
 
-        pedido_id = envio["pedido"]
-        pedido = self.pedido_service.obtener(pedido_id)
+            dialog = EnvioForm(
+                envio_service=self.envio_service,
+                pedido_service=self.pedido_service,
+                envio=envio,
+                parent=self
+            )
+            if dialog.exec():
+                self.cargar_datos()
 
-        
-
-        self.form = EnvioForm(
-            pedido=pedido,
-            envio_service=self.envio_service,
-            on_success=self.cargar_datos,
-            envio=envio
-        )
-        self.form.show()
-        
-        
+        except Exception as e:
+            QMessageBox.warning(self, "Error al Editar", str(e))
