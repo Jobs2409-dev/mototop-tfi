@@ -77,15 +77,18 @@ class PedidoCard(QWidget):
         details_layout = QHBoxLayout()
         
         # Identificación comercial del vendedor / canal
-        # Identificación comercial del vendedor / canal
         vendedor = pedido.get('vendedor')
         origen_raw = pedido.get('origen', 'N/A')
         origen_str = str(origen_raw).lower()
 
         if isinstance(vendedor, dict):
-            vendedor_text = f"{vendedor.get('nombre', '')} {vendedor.get('apellido', '')}".strip()
+            nombre = vendedor.get('nombre', '')
+            apellido = vendedor.get('apellido', '')
+            vendedor_text = f"{nombre} {apellido}".strip() or "Vendedor sin nombre"
         elif vendedor is not None:
             vendedor_text = f"Vendedor #{vendedor}"
+        elif origen_str == 'mobile':
+            vendedor_text = "Vendedor Mobile (No asignado)"
         elif origen_str == 'web':
             vendedor_text = "Tienda Online (Portal Web)"
         elif origen_str == 'local':

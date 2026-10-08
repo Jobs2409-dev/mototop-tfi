@@ -10,12 +10,19 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
     TokenVerifyView,
 )
+from core.views import VendedorTokenObtainPairView, ClienteTokenObtainPairView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('core.urls')),
     path('api-auth/', include('rest_framework.urls')),
-    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    
+    # Vendedor login app
+    path('api/token/', VendedorTokenObtainPairView.as_view(), name='token_obtain_pair'),
+    
+    #Cliente login web
+    path('api/token/cliente/', ClienteTokenObtainPairView.as_view(), name='token_cliente'),
+    
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
 ]

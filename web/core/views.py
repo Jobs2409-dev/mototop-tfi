@@ -151,9 +151,9 @@ def login_view(request):
         # Ajuste dinámico de la URL de autenticación del backend
         base_api = settings.API_BASE_URL.rstrip('/')
         if base_api.endswith('/api'):
-            token_url = f"{base_api}/token/"
+            token_url = f"{base_api}/token/cliente/"
         else:
-            token_url = f"{base_api}/api/token/"
+            token_url = f"{base_api}/api/token/cliente/"
 
         try:
             # Petición a la API REST para validar credenciales en MySQL
@@ -169,11 +169,20 @@ def login_view(request):
                 request.session['access_token'] = data.get('access')
                 request.session['refresh_token'] = data.get('refresh')
                 request.session['username'] = username
+                request.session['cliente_id'] = data.get('cliente_id')
 
-                messages.success(request, f'Bienvenido/a, {username}')
+                nombre = data.get('nombre_completo') or username
+                messages.success(request, f'Bienvenido/a, {nombre}')
                 return redirect('home')
             else:
-                messages.error(request, 'Usuario o contraseña incorrectos.')
+                # Extrae el mensaje específico de la API (ej: "Acceso denegado...")
+                try:
+                    error_data = response.json()
+                    error_msg = error_data.get('detail', 'Usuario o contraseña incorrectos.')
+                except Exception:
+                    error_msg = 'Usuario o contraseña incorrectos.'
+                messages.error(request, error_msg)
+
         except requests.exceptions.RequestException:
             messages.error(request, 'No se pudo conectar con el servidor de la API.')
 
@@ -243,9 +252,9 @@ def register_view(request):
                 )
 
                 if res_cliente.status_code == 201:
-                    # 3. Autenticar inmediatamente contra la API (/token/)
+                    # 3. Autenticar inmediatamente contra la API (/token/cliente/)
                     res_token = requests.post(
-                        f"{base_api}/token/",
+                        f"{base_api}/token/cliente/",  # <-- Con barra final
                         json={'username': username, 'password': password},
                         timeout=5
                     )
@@ -255,6 +264,7 @@ def register_view(request):
                         request.session['access_token'] = token_data.get('access')
                         request.session['refresh_token'] = token_data.get('refresh')
                         request.session['username'] = username
+                        request.session['cliente_id'] = token_data.get('cliente_id')
                         messages.success(request, '¡Cuenta creada con éxito!')
                         return redirect('home')
 
@@ -279,10 +289,10 @@ def logout_view(request):
 @require_POST
 def crear_pedido_view(request):
     token = request.session.get('access_token')
-    username = request.session.get('username')
+    cliente_id = request.session.get('cliente_id')
 
-    if not token or not username:
-        return JsonResponse({'success': False, 'error': 'Usuario no autenticado.'}, status=401)
+    if not token or not cliente_id:
+        return JsonResponse({'success': False, 'error': 'Usuario o sesión invalida.'}, status=401)
 
     try:
         body = json.loads(request.body)
@@ -297,40 +307,20 @@ def crear_pedido_view(request):
 
         headers = {'Authorization': f'Bearer {token}'}
 
-        # 1. Obtener la lista de clientes para ubicar el ID correspondiente al usuario
-        res_cliente = requests.get(f"{base_api}/clientes/", headers=headers, timeout=5)
-        if res_cliente.status_code != 200:
-            return JsonResponse({'success': False, 'error': 'No se pudo verificar el perfil del cliente.'}, status=400)
-
-        clientes = res_cliente.json()
-        cliente_obj = None
-
-        # Si viene paginado o lista simple
-        lista_clientes = clientes.get('results', clientes) if isinstance(clientes, dict) else clientes
-
-        # Buscar cliente vinculado al usuario o por coincidencia
-        for c in lista_clientes:
-            # Compara coincidencia de usuario o mail/dni
-            cliente_obj = c
-            break
-
-        if not cliente_obj:
-            return JsonResponse({'success': False, 'error': 'No se encontró un cliente registrado para realizar la orden.'}, status=404)
-
-        # 2. Armar Payload según PedidoWriteSerializer de la API
+        # Armar Payload
         detalles_payload = [
             {'producto': item['id'], 'cantidad': item['cantidad']}
             for item in items
         ]
 
         pedido_payload = {
-            'cliente': cliente_obj['id'],
+            'cliente': cliente_id,
             'origen': 'web',
             'observaciones': 'Pedido realizado desde la Plataforma Web MOTO-TOP',
             'detalles': detalles_payload
         }
 
-        # 3. Enviar a la API
+        # Enviar a la API
         res_pedido = requests.post(f"{base_api}/pedidos/", json=pedido_payload, headers=headers, timeout=5)
 
         if res_pedido.status_code in [200, 201]:
@@ -343,14 +333,13 @@ def crear_pedido_view(request):
         return JsonResponse({'success': False, 'error': 'Error de comunicación con el backend API.'}, status=500)
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
-    
-    
-    
+
+
 def mis_pedidos_view(request):
     token = request.session.get('access_token')
-    username = request.session.get('username')
+    cliente_id = request.session.get('cliente_id')
 
-    if not token or not username:
+    if not token or not cliente_id:
         messages.warning(request, 'Iniciá sesión para consultar tus pedidos.')
         return redirect('login')
 
@@ -362,43 +351,31 @@ def mis_pedidos_view(request):
     pedidos_usuario = []
 
     try:
-        # 1. Obtener los datos del cliente logueado
-        res_clientes = requests.get(f"{base_api}/clientes/", headers=headers, timeout=5)
-        cliente_id = None
-        if res_clientes.status_code == 200:
-            data_c = res_clientes.json()
-            lista_c = data_c.get('results', data_c) if isinstance(data_c, dict) else data_c
-            for c in lista_c:
-                cliente_id = c.get('id')
-                break
-
-        # 2. Obtener lista de pedidos
+        # Consultar pedidos
         res_pedidos = requests.get(f"{base_api}/pedidos/", headers=headers, timeout=5)
         if res_pedidos.status_code == 200:
             data_p = res_pedidos.json()
             lista_p = data_p.get('results', data_p) if isinstance(data_p, dict) else data_p
 
-            if cliente_id:
-                pedidos_usuario = [
-                    p for p in lista_p 
-                    if isinstance(p.get('cliente'), dict) and p['cliente'].get('id') == cliente_id
-                ]
-            else:
-                pedidos_usuario = lista_p
+            # Filtrar exactamente por el ID del cliente logueado
+            for p in lista_p:
+                c_id = p.get('cliente')
+                if isinstance(c_id, dict):
+                    c_id = c_id.get('id')
+                if c_id == cliente_id:
+                    pedidos_usuario.append(p)
 
-        # 3. Obtener lista de envíos para asociar flete y estado logístico
+        # Consultar envíos
         res_envios = requests.get(f"{base_api}/envios/", headers=headers, timeout=5)
         mapa_envios = {}
         if res_envios.status_code == 200:
             data_e = res_envios.json()
             lista_e = data_e.get('results', data_e) if isinstance(data_e, dict) else data_e
             for env in lista_e:
-                # El campo 'pedido' en Envio es la FK/ID del pedido
                 pedido_ref_id = env.get('pedido')
                 if pedido_ref_id:
                     mapa_envios[pedido_ref_id] = env
 
-        # 4. Vincular el envío correspondiente a cada pedido
         for ped in pedidos_usuario:
             ped['envio'] = mapa_envios.get(ped['id'], None)
 
@@ -414,7 +391,6 @@ def mis_pedidos_view(request):
         'esta_autenticado': True,
     }
     return render(request, 'core/mis_pedidos.html', context)
-
 
 
 def ver_factura_view(request, pedido_id):
@@ -450,7 +426,6 @@ def ver_factura_view(request, pedido_id):
         messages.error(request, 'Error de conexión con el servidor al consultar la factura.')
         return redirect('mis_pedidos')
     
-
 
 
 def empresa_view(request):
@@ -492,7 +467,6 @@ def empresa_view(request):
     return render(request, 'core/empresa.html', context)
 
 
-
 @require_POST
 def ai_chat_view(request):
     try:
@@ -531,7 +505,5 @@ def ai_chat_view(request):
         return JsonResponse({'error': f'Error de comunicación con la API: {str(e)}'}, status=503)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
-    
-    
     
     

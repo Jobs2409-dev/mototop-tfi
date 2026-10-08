@@ -80,9 +80,7 @@
     {% if promociones_con_productos %}
       {% for promo in promociones_con_productos %}
         <div class="mb-5">
-          <h3 class="fw-bold text-dark mb-4 text-uppercase border-bottom pb-2">
-            {{ promo.tipo|title }} 
-          </h3>
+          <h3 class="fw-bold text-dark mb-4 text-uppercase border-bottom pb-2">{{ promo.tipo|title }}</h3>
           <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
             {% for prod in promo.productos %}
               <div class="col">
@@ -105,7 +103,7 @@
                       <p class="text-danger fs-5 fw-bold mb-2">Ahora: ${{ prod.precio_final|floatformat:2 }}</p>
 
                       {% if esta_autenticado %}
-                        <button class="btn btn-warning btn-sm w-100 fw-semibold">Agregar al Pedido</button>
+                        <button class="btn btn-warning btn-sm w-100 fw-semibold" onclick="addToCart({{ prod.id }}, '{{ prod.nombre|escapejs }}', {{ prod.precio_final }}, {{ prod.stock }})"><i class="bi bi-plus-circle me-1"></i> Agregar al Pedido</button>
                       {% else %}
                         <a href="{% url 'login' %}" class="btn btn-outline-warning btn-sm w-100 fw-semibold" title="Iniciá sesión para hacer un pedido">Iniciá sesión para pedir</a>
                       {% endif %}
@@ -132,9 +130,9 @@
                   <span class="badge bg-danger position-absolute top-0 end-0 m-2">{{ prod.descuento_str }}</span>
                   <span class="badge bg-warning text-dark position-absolute top-0 start-0 m-2 fw-bold">EN PROMOCIÓN</span>
                 {% endif %}
-                  {% if prod.stock == 0 %}
-                    <span class="badge bg-secondary text-white position-absolute top-0 start-50 translate-middle-x m-2 fw-bold">Agotado</span>
-                  {% endif %}
+                {% if prod.stock == 0 %}
+                  <span class="badge bg-secondary text-white position-absolute top-0 start-50 translate-middle-x m-2 fw-bold">Agotado</span>
+                {% endif %}
 
                 {% if prod.img %}
                   <img src="{{ prod.img }}" class="card-img-top product-img" alt="{{ prod.nombre }}" style="height: 180px; object-fit: contain;" />

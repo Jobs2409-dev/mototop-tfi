@@ -24,6 +24,14 @@ from rest_framework.permissions import AllowAny
 from .serializers import GeminiChatSerializer
 
 
+from rest_framework_simplejwt.views import TokenObtainPairView
+
+class VendedorTokenObtainPairView(TokenObtainPairView):
+    serializer_class = VendedorTokenObtainPairSerializer
+
+class ClienteTokenObtainPairView(TokenObtainPairView):
+    serializer_class = ClienteTokenObtainPairSerializer
+
 class PedidoViewSet(viewsets.ModelViewSet):
 
     queryset = Pedido.objects.all()
@@ -72,6 +80,15 @@ class PedidoViewSet(viewsets.ModelViewSet):
             {"mensaje": "Pedido cancelado correctamente"},
             status=status.HTTP_200_OK
         )
+        
+    def perform_create(self, serializer):
+       user = self.request.user
+        
+       # Si el usuario autenticado tiene un perfil/instancia de Vendedor asociada:
+       if hasattr(user, 'vendedor'):  # o Vendedor.objects.filter(usuario=user).first()
+           serializer.save(vendedor=user.vendedor, origen='mobile')
+       else:
+           serializer.save()
 
     @action(detail=True, methods=['get'])
     def factura(self, request, pk=None):
@@ -128,6 +145,7 @@ class ProductoViewSet(viewsets.ModelViewSet):
 class ClienteViewSet(viewsets.ModelViewSet):
     queryset = Cliente.objects.all()
     serializer_class = ClienteSerializer
+    permission_classes = [AllowAny]
     
 
 # VendedorViewSet
@@ -387,7 +405,6 @@ class InformeViewSet(viewsets.ViewSet):
         return Response(data)
     
 
-
 class GeminiChatView(APIView):
     permission_classes = [AllowAny]
 
@@ -409,9 +426,4 @@ class GeminiChatView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
             
-            
-            
-            
-            
-
-           
+                      

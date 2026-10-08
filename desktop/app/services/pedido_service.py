@@ -16,7 +16,17 @@ class PedidoService:
 
     def confirmar(self, pedido_id):
         response = self.http.post(f"pedidos/{pedido_id}/confirmar/")
-        response.raise_for_status()
+        if not response.ok:
+            try:
+                data = response.json()
+                mensaje = data.get("error") or data.get("detail") or response.text
+                if isinstance(mensaje, list):
+                    mensaje = " ".join(mensaje)
+                raise Exception(mensaje)
+            except Exception as parse_err:
+                if str(parse_err) != response.text:
+                    raise parse_err
+                response.raise_for_status()
         return response.json()
 
     def cancelar(self, pedido_id):

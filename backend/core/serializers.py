@@ -11,7 +11,56 @@ from django.db.models import Sum
 from django.contrib.auth.models import User
 
 
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework.exceptions import AuthenticationFailed
 
+
+class ClienteTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        user = self.user
+
+        # Verificar si tiene un perfil de Cliente asociado
+        if not hasattr(user, 'cliente'):
+            raise AuthenticationFailed(
+                "Acceso denegado: Esta cuenta no está registrada como cliente."
+            )
+
+        data['rol'] = 'cliente'
+        data['cliente_id'] = user.cliente.id
+        data['nombre_completo'] = f"{user.cliente.nombre} {user.cliente.apellido or ''}".strip()
+
+        return data
+
+class VendedorTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        # Valida username y password con Django
+        data = super().validate(attrs)
+        user = self.user
+
+        # Permitir superusuarios/staff para desarrollo o testing si lo deseas
+        if user.is_superuser or user.is_staff:
+            data['rol'] = 'admin'
+            return data
+
+        # Verificar si tiene un perfil de Vendedor asociado
+        if not hasattr(user, 'vendedor'):
+            raise AuthenticationFailed(
+                "Acceso denegado: Esta aplicación es exclusiva para vendedores."
+            )
+
+        # Verificar si el vendedor está activo
+        if user.vendedor.estado != 'activo':
+            raise AuthenticationFailed(
+                "Acceso denegado: Su cuenta de vendedor se encuentra inactiva."
+            )
+
+        # Agregamos datos útiles para la app en la respuesta
+        data['rol'] = 'vendedor'
+        data['vendedor_id'] = user.vendedor.id
+        data['nombre_completo'] = f"{user.vendedor.nombre} {user.vendedor.apellido or ''}".strip()
+
+        return data
 
 class ProveedorSerializer(serializers.ModelSerializer):
     class Meta:
