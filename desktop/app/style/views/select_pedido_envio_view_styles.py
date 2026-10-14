@@ -1,7 +1,10 @@
-# desktop/app/style/views/select_pedido_envio_view_styles.py
 QSS_STYLE = """
-    QWidget#SelectPedidoEnvioView {
-        background-color: #ffffff;
+    QDialog, QWidget#SelectPedidoEnvioView {
+        background-color: #f8f9fa;
+    }
+    QLabel {
+        color: #212529;
+        font-family: 'Segoe UI', Arial, sans-serif;
     }
     QTableWidget {
         background-color: #ffffff;
@@ -12,22 +15,22 @@ QSS_STYLE = """
         color: #212529;
     }
     QHeaderView::section {
-        background-color: #f8f9fa;
-        color: #495057;
+        background-color: #1e1e24;
+        color: #ffffff;
         padding: 8px;
         font-weight: bold;
         border: none;
-        border-bottom: 2px solid #dee2e6;
     }
     QTableWidget::item {
         padding: 6px;
+        color: #212529;
     }
     QTableWidget::item:selected {
-        background-color: #f8d7da;
-        color: #b02a37;
+        background-color: #e53935;
+        color: #ffffff;
     }
     QPushButton#btn_seleccionar {
-        background-color: #dc3545;
+        background-color: #e53935;
         color: white;
         border: none;
         border-radius: 4px;
@@ -38,9 +41,9 @@ QSS_STYLE = """
         margin-top: 10px;
     }
     QPushButton#btn_seleccionar:hover {
-        background-color: #bd2130;
+        background-color: #d32f2f;
     }
     QPushButton#btn_seleccionar:pressed {
-        background-color: #b02a37;
+        background-color: #b71c1c;
     }
 """

@@ -1,73 +1,135 @@
 # desktop/app/style/views/cliente_view_style.py
+
 ESTILO_CLIENTE_VIEW = """
-/* Barra Superior */
+/* Contenedor principal de la vista */
+QWidget {
+    background-color: #f5f6f8;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    color: #2c3e50;
+}
+
+/* ================================================================= */
+/* BARRA SUPERIOR Y BOTONES DE ACCIÓN                                 */
+/* ================================================================= */
 QPushButton#btn_nuevo_cliente {
-    background-color: #673AB7;
-    color: white;
+    background-color: #e53935; /* Rojo institucional del sistema */
+    color: #ffffff;
     border: none;
     padding: 8px 16px;
-    border-radius: 4px;
+    border-radius: 5px;
     font-weight: bold;
     font-size: 13px;
 }
 QPushButton#btn_nuevo_cliente:hover {
-    background-color: #5E35B1;
+    background-color: #d32f2f;
+}
+QPushButton#btn_nuevo_cliente:pressed {
+    background-color: #b71c1c;
 }
 
 QPushButton#btn_refrescar_cliente {
-    background-color: #757575;
-    color: white;
+    background-color: #1e1e24; /* Gris/Negro secundario */
+    color: #ffffff;
     border: none;
     padding: 8px 16px;
-    border-radius: 4px;
+    border-radius: 5px;
     font-weight: bold;
     font-size: 13px;
 }
 QPushButton#btn_refrescar_cliente:hover {
-    background-color: #616161;
+    background-color: #33333d;
 }
 
-/* Tabla de Clientes */
+/* ================================================================= */
+/* TABLA DE CLIENTES                                                 */
+/* ================================================================= */
 QTableWidget#tabla_clientes {
-    background-color: #FFFFFF;
-    alternate-background-color: #F9F9F9;
-    gridline-color: #E0E0E0;
-    border: 1px solid #D8D8D8;
-    border-radius: 4px;
-    selection-background-color: #EDE7F6;
-    selection-color: #311B92;
+    background-color: #ffffff;
+    alternate-background-color: #f8fafc;
+    gridline-color: #e2e8f0;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 13px;
 }
 
-QHeaderView::section {
-    background-color: #F5F5F5;
-    color: #333333;
-    padding: 6px;
-    font-weight: bold;
-    border: 1px solid #E0E0E0;
-}
-
-/* Botones de Acción dentro de la Tabla */
-QPushButton#btn_accion_editar {
-    background-color: #673AB7;
-    color: white;
-    border: none;
+/* Se omite 'color' para permitir que setForeground() desde Python pinte sin bloqueos */
+QTableWidget#tabla_clientes::item {
     padding: 4px 8px;
-    border-radius: 3px;
+}
+
+QTableWidget#tabla_clientes::item:selected {
+    background-color: #e53935;
+    color: #ffffff;
+}
+
+/* Cabecera de la Tabla */
+QHeaderView::section {
+    background-color: #1e1e24; /* Cabecera oscura elegante */
+    color: #ffffff;
+    padding: 8px;
     font-weight: bold;
+    font-size: 13px;
+    border: none;
+    border-right: 1px solid #33333d;
+}
+
+/* ================================================================= */
+/* BOTONES DE ACCIÓN DENTRO DE LA TABLA                              */
+/* ================================================================= */
+QPushButton#btn_accion_editar {
+    background-color: #1e1e24;
+    color: #ffffff;
+    border: none;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 11px;
+    max-height: 22px;
 }
 QPushButton#btn_accion_editar:hover {
-    background-color: #5E35B1;
+    background-color: #33333d;
 }
 
 QPushButton#btn_accion_eliminar {
-    background-color: #E53935;
-    color: white;
+    background-color: #e53935;
+    color: #ffffff;
     border: none;
-    padding: 4px 8px;
-    border-radius: 3px;
+    padding: 3px 8px;
+    border-radius: 4px;
     font-weight: bold;
+    font-size: 11px;
+    max-height: 22px;
 }
 QPushButton#btn_accion_eliminar:hover {
-    background-color: #D32F2F;
+    background-color: #d32f2f;
+}
+
+/* ================================================================= */
+/* CONFIGURACIÓN EXCLUSIVA PARA EL MENSAJE DE CONFIRMACIÓN (QMessageBox) */
+/* ================================================================= */
+QMessageBox {
+    background-color: #ffffff;
+    border: 1px solid #cbd5e1;
+}
+
+QMessageBox QLabel {
+    color: #2c3e50 !important;
+    font-weight: normal;
+    font-size: 13px;
+    background-color: transparent;
+}
+
+QMessageBox QPushButton {
+    background-color: #f1f5f9;
+    color: #2c3e50;
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+    font-weight: bold;
+    padding: 6px 15px;
+    min-width: 70px;
+}
+
+QMessageBox QPushButton:hover {
+    background-color: #e2e8f0;
 }
 """

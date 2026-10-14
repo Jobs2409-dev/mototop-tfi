@@ -1,26 +1,32 @@
-# Entorno virtual
-venv/
-.venv/
-.webenv/
+# Entornos virtuales (en cualquier subcarpeta)
+**/.venv/
+**/.webenv/
+**/venv/
+**/env/
 
 # Python
-__pycache__/
+**/__pycache__/
 *.pyc
 
-# Django
+# Django / DB
 db.sqlite3
 *.log
 
 # Variables de entorno
 .env
+**/.env
 
-# IDEs
+# IDEs / Editores
 .vscode/
 .idea/
 
-# Node (por web si usás JS)
-node_modules/
+# Node
+**/node_modules/
 
 # OS
 .DS_Store
 Thumbs.db
+
+# Certificados SSL / TLS
+backend/ca.pem
+*.pem

@@ -27,6 +27,7 @@ class EnvioForm(QDialog):
         self.envio = envio
         self.pedido_seleccionado = None
 
+        self.setObjectName("EnvioForm")
         self.setWindowTitle("Editar Envío" if envio else "Nuevo Envío de Transporte")
         self.resize(520, 540)
         self.setStyleSheet(QSS_STYLE)
@@ -125,7 +126,6 @@ class EnvioForm(QDialog):
             envios = envios_res.get("results", envios_res) if isinstance(envios_res, dict) else envios_res
             pedidos_con_envio = {e["pedido"]["id"] if isinstance(e["pedido"], dict) else e["pedido"] for e in envios}
 
-            # En modo edición permitimos conservar el pedido actual
             p_actual_id = self.pedido_seleccionado["id"] if self.pedido_seleccionado else None
             disponibles = [p for p in pedidos_confirmados if p["id"] not in pedidos_con_envio or p["id"] == p_actual_id]
 
@@ -151,7 +151,6 @@ class EnvioForm(QDialog):
         except Exception:
             self.lbl_pedido.setText(f"Pedido #{p_id}")
 
-        # Deshabilitar cambio de pedido en modo edición para mantener integridad
         self.btn_buscar_pedido.setEnabled(False)
 
         self.empresa_transporte.setCurrentText(self.envio.get("empresa_transporte", ""))

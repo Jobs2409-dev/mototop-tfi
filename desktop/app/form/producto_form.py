@@ -1,7 +1,7 @@
 # desktop/app/form/producto_form.py
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton,
-    QListWidget, QLabel, QMessageBox, QListWidgetItem, QFileDialog, QApplication
+    QListWidget, QLabel, QMessageBox, QListWidgetItem, QFileDialog, QApplication, QScrollArea
 )
 from PyQt6.QtCore import Qt
 
@@ -26,8 +26,24 @@ class ProductoForm(QWidget):
         self.setObjectName("producto_form_window")
         self.setStyleSheet(ESTILO_PRODUCTO_FORM)
 
-        # Layout Principal General
-        main_layout = QVBoxLayout()
+        # -------------------------------------------------------------
+        # 1. Creamos un QScrollArea para permitir scroll vertical
+        # -------------------------------------------------------------
+        scroll = QScrollArea(self)
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QScrollArea.Shape.NoFrame) # Para quitar bordes feos al scroll
+
+        # Contenedor interno donde irá todo el contenido del formulario
+        content_widget = QWidget()
+        content_widget.setObjectName("form_content_widget")
+        
+        # Layout principal de la ventana que aloja el QScrollArea
+        window_layout = QVBoxLayout(self)
+        window_layout.setContentsMargins(0, 0, 0, 0)
+        window_layout.addWidget(scroll)
+
+        # Layout que contendrá los elementos dentro del scroll
+        main_layout = QVBoxLayout(content_widget)
         main_layout.setContentsMargins(25, 25, 25, 25)
         main_layout.setSpacing(15)
 
@@ -185,7 +201,8 @@ class ProductoForm(QWidget):
         self.btn_save.clicked.connect(self.save)
         main_layout.addWidget(self.btn_save)
 
-        self.setLayout(main_layout)
+        # Finalizamos asignando el widget interno al scroll
+        scroll.setWidget(content_widget)
 
         # Cargar opciones y datos existentes si es edición
         self.load_options()
@@ -221,6 +238,10 @@ class ProductoForm(QWidget):
     # =========================
     def load_options(self):
         try:
+            # 1. Guardar las selecciones actuales antes de limpiar
+            selected_rubro_ids = self.get_selected_ids(self.rubros_list)
+            selected_prov_ids = self.get_selected_ids(self.prov_list)
+
             self.rubros_list.clear()
             self.prov_list.clear()
 
@@ -230,15 +251,21 @@ class ProductoForm(QWidget):
             rubros_data = rubros.get("results", rubros)
             proveedores_data = proveedores.get("results", proveedores)
 
+            # 2. Poblar lista de rubros y restaurar selecciones
             for r in rubros_data:
                 item = QListWidgetItem(r["nombre"])
                 item.setData(1, r["id"])
                 self.rubros_list.addItem(item)
+                if r["id"] in selected_rubro_ids:
+                    item.setSelected(True)
 
+            # 3. Poblar lista de proveedores y restaurar selecciones
             for p in proveedores_data:
                 item = QListWidgetItem(p["nombre"])
                 item.setData(1, p["id"])
                 self.prov_list.addItem(item)
+                if p["id"] in selected_prov_ids:
+                    item.setSelected(True)
 
         except Exception as e:
             QMessageBox.critical(self, "Error", str(e))
@@ -248,18 +275,15 @@ class ProductoForm(QWidget):
 
     def refresh_lists(self):
         self.load_options()
-        QApplication.processEvents()
-        if self.rubros_list.count():
-            self.rubros_list.scrollToBottom()
-        if self.prov_list.count():
-            self.prov_list.scrollToBottom()
 
     def select_item_by_id(self, list_widget, item_id):
         for i in range(list_widget.count()):
             item = list_widget.item(i)
             if item and item.data(1) == item_id:
-                list_widget.setCurrentItem(item)
-                list_widget.scrollToItem(item)
+                # Marcamos la selección
+                item.setSelected(True)
+                # Desplazamos suavemente hasta el ítem
+                list_widget.scrollToItem(item, QListWidget.ScrollHint.EnsureVisible)
                 return
 
     # =========================

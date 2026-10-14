@@ -27,8 +27,6 @@ from services.pedido_service import PedidoService
 # VENDEDORES
 # =========================
 from services.vendedor_service import VendedorService
-from services.zona_service import ZonaService
-from services.user_service import UserService
 from views.vendedor_view import VendedorView
 
 # =========================
@@ -132,7 +130,7 @@ class MainWindow(QWidget):
         btn_clientes = QPushButton("Clientes")
         btn_pedidos = QPushButton("Pedidos")
         btn_facturas = QPushButton("Facturas")
-        btn_compras = QPushButton("Compras")
+        # btn_compras = QPushButton("Compras")
         btn_pagos = QPushButton("Cobranzas")
         btn_envios = QPushButton("Envíos")
         btn_informes = QPushButton("Informes")
@@ -142,7 +140,7 @@ class MainWindow(QWidget):
         sidebar_layout.addWidget(btn_clientes)
         sidebar_layout.addWidget(btn_pedidos)
         sidebar_layout.addWidget(btn_facturas)
-        sidebar_layout.addWidget(btn_compras)
+        # sidebar_layout.addWidget(btn_compras)
         sidebar_layout.addWidget(btn_pagos)
         sidebar_layout.addWidget(btn_envios)
         sidebar_layout.addWidget(btn_informes)
@@ -204,7 +202,7 @@ class MainWindow(QWidget):
         btn_clientes.clicked.connect(lambda: self.stack.setCurrentWidget(self.view_clientes))
         btn_pedidos.clicked.connect(lambda: self.stack.setCurrentWidget(self.view_pedidos))
         btn_facturas.clicked.connect(lambda: self.stack.setCurrentWidget(self.view_facturas))
-        btn_compras.clicked.connect(lambda: self.stack.setCurrentWidget(self.view_compras))
+        # btn_compras.clicked.connect(lambda: self.stack.setCurrentWidget(self.view_compras))
         btn_pagos.clicked.connect(lambda: self.stack.setCurrentWidget(self.view_pagos))
         btn_envios.clicked.connect(lambda: self.stack.setCurrentWidget(self.view_envios))
         btn_informes.clicked.connect(lambda: self.stack.setCurrentWidget(self.view_informes))

@@ -4,5 +4,6 @@ idna==3.13
 PyQt6==6.11.0
 PyQt6-Qt6==6.11.0
 PyQt6_sip==13.11.1
+python-decouple==3.8
 requests==2.33.1
 urllib3==2.6.3

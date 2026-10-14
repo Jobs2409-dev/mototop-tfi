@@ -5,6 +5,27 @@ QWidget#producto_form_window {
     color: #2c3e50;
 }
 
+QScrollArea {
+    background: transparent;
+    border: none;
+}
+
+QScrollArea > QWidget > QWidget {
+    background-color: #f5f6f8;
+}
+
+QWidget#form_content_widget {
+    background-color: #f5f6f8;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    color: #2c3e50;
+}
+
+QWidget#producto_form_window {
+    background-color: #f5f6f8;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    color: #2c3e50;
+}
+
 QLabel {
     font-size: 13px;
     font-weight: bold;
@@ -37,6 +58,7 @@ QLineEdit {
     border-radius: 5px;
     padding: 8px 12px;
     font-size: 13px;
+    color: #2c3e50
 }
 
 QLineEdit:focus {
@@ -48,11 +70,13 @@ QListWidget {
     border: 1px solid #cbd5e1;
     border-radius: 5px;
     padding: 5px;
+    color: #2c3e50;
 }
 
 QListWidget::item {
     padding: 6px;
     border-bottom: 1px solid #f1f5f9;
+    color: #2c3e50;
 }
 
 QListWidget::item:selected {
@@ -123,5 +147,33 @@ QPushButton#action_red {
 }
 QPushButton#action_red:hover {
     background-color: #c0392b;
+}
+
+QMessageBox {
+    background-color: #ffffff; /* Fondo blanco */
+    border: 1px solid #cbd5e1;
+}
+
+/* Fuerza el texto a color oscuro legible */
+QMessageBox QLabel {
+    color: #2c3e50 !important;
+    font-weight: normal;
+    font-size: 13px;
+    background-color: transparent;
+}
+
+/* Estilo claro y elegante para los botones de la confirmación */
+QMessageBox QPushButton {
+    background-color: #f1f5f9;
+    color: #2c3e50;
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+    font-weight: bold;
+    padding: 6px 15px;
+    min-width: 70px;
+}
+
+QMessageBox QPushButton:hover {
+    background-color: #e2e8f0;
 }
 """

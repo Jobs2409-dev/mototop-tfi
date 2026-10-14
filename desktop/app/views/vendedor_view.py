@@ -12,7 +12,7 @@ from PyQt6.QtWidgets import (
     QHeaderView,
 )
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QColor
+from PyQt6.QtGui import QColor, QFont
 
 from services.vendedor_service import VendedorService
 from services.zona_service import ZonaService
@@ -72,7 +72,6 @@ class VendedorView(QWidget):
         )
         self.lbl_mensaje.setObjectName("lbl_mensaje_info")
         self.lbl_mensaje.setWordWrap(True)
-        main_layout.addWidget(self.lbl_mensaje)
 
         # =========================
         # TABLA DE VENDEDORES
@@ -88,6 +87,9 @@ class VendedorView(QWidget):
         self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.table.setAlternatingRowColors(True)
         self.table.setShowGrid(True)
+
+        # Alto de filas suficiente para prevenir cortes en botones
+        self.table.verticalHeader().setDefaultSectionSize(38)
 
         header = self.table.horizontalHeader()
         header.setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
@@ -105,11 +107,34 @@ class VendedorView(QWidget):
         header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
         header.setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
 
+        # Agregamos elementos al layout principal en orden
+        main_layout.addWidget(self.lbl_mensaje)
         main_layout.addLayout(top_bar)
         main_layout.addWidget(self.table)
         self.setLayout(main_layout)
 
         self.load_data()
+
+    def _crear_item_estado(self, estado_texto):
+        """Crea un QTableWidgetItem en negrita y con el color de estado correspondiente."""
+        estado_clean = str(estado_texto).strip().upper()
+        
+        estado_item = QTableWidgetItem(estado_clean)
+        estado_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        # Configurar fuente en Negrita
+        font = QFont("Segoe UI", 10)
+        font.setBold(True)
+        font.setWeight(QFont.Weight.Bold)
+        estado_item.setFont(font)
+
+        # Configurar color de texto
+        if estado_clean in ["ACTIVO", "HABILITADO", "TRUE", "1"]:
+            estado_item.setForeground(QColor(COLOR_ESTADO_ACTIVO))
+        else:
+            estado_item.setForeground(QColor(COLOR_ESTADO_INACTIVO))
+
+        return estado_item
 
     def load_data(self):
         try:
@@ -147,22 +172,16 @@ class VendedorView(QWidget):
                 self.table.setItem(row, 5, QTableWidgetItem(username))
                 self.table.setItem(row, 6, QTableWidgetItem(password))
 
-                # Manejo visual del Estado usando constantes de color
+                # Manejo visual del Estado usando negrita y colores vivos
                 estado = str(vendedor.get("estado", "")).upper()
-                estado_item = QTableWidgetItem(estado)
-                estado_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-
-                if estado in ["ACTIVO", "HABILITADO"]:
-                    estado_item.setForeground(QColor(COLOR_ESTADO_ACTIVO))
-                else:
-                    estado_item.setForeground(QColor(COLOR_ESTADO_INACTIVO))
-
+                estado_item = self._crear_item_estado(estado)
                 self.table.setItem(row, 7, estado_item)
 
                 # Celda contenedora del botón de acción
                 btn_container = QWidget()
                 btn_layout = QHBoxLayout(btn_container)
                 btn_layout.setContentsMargins(4, 2, 4, 2)
+                btn_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
                 btn_estado = QPushButton("Cambiar")
                 btn_estado.setObjectName("btn_cambiar_estado")
@@ -184,14 +203,8 @@ class VendedorView(QWidget):
             nuevo_estado = str(resultado.get("estado", "")).upper()
             mensaje = resultado.get("mensaje", "Estado cambiado con éxito.")
 
-            estado_item = QTableWidgetItem(nuevo_estado)
-            estado_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-
-            if nuevo_estado in ["ACTIVO", "HABILITADO"]:
-                estado_item.setForeground(QColor(COLOR_ESTADO_ACTIVO))
-            else:
-                estado_item.setForeground(QColor(COLOR_ESTADO_INACTIVO))
-
+            # Actualizar celda con negrita y color correcto
+            estado_item = self._crear_item_estado(nuevo_estado)
             self.table.setItem(row, 7, estado_item)
 
             QMessageBox.information(self, "Operación Exitosa", mensaje)

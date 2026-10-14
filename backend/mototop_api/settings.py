@@ -74,6 +74,8 @@ WSGI_APPLICATION = 'mototop_api.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+# backend/mototop_api/settings.py
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -82,6 +84,11 @@ DATABASES = {
         'PASSWORD': config('DB_PASSWORD'),
         'HOST': config('DB_HOST'),
         'PORT': config('DB_PORT'),
+        'OPTIONS': {
+            'ssl': {
+                'ca': os.path.join(BASE_DIR, 'ca.pem'),
+            },
+        },
     }
 }
 
