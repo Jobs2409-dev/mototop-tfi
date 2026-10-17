@@ -507,3 +507,81 @@ def ai_chat_view(request):
         return JsonResponse({'error': str(e)}, status=500)
     
     
+
+def empresa_view(request):
+    base_api = settings.API_BASE_URL.rstrip('/')
+    if not base_api.endswith('/api'):
+        base_api = f"{base_api}/api"
+
+    zonas = []
+    try:
+        # Obtener las zonas de cobertura desde la API para el desplegable
+        res_zonas = requests.get(f"{base_api}/zonas/", timeout=5)
+        if res_zonas.status_code == 200:
+            data_z = res_zonas.json()
+            zonas = data_z.get('results', data_z) if isinstance(data_z, dict) else data_z
+    except requests.exceptions.RequestException:
+        zonas = []
+
+    if request.method == 'POST':
+        nombre_comercio = request.POST.get('nombre_comercio', '').strip()
+        contacto = request.POST.get('contacto', '').strip()
+        telefono = request.POST.get('telefono', '').strip()
+        email = request.POST.get('email', '').strip()
+        localidad = request.POST.get('localidad', '').strip()
+        zona_id = request.POST.get('zona')
+        mensaje = request.POST.get('mensaje', '').strip()
+
+        # Validar que se haya seleccionado una Zona válida con ID numérico
+        if not zona_id or not str(zona_id).isdigit():
+            messages.error(
+                request, 
+                'Debes seleccionar una zona de cobertura válida para solicitar la visita.'
+            )
+            return redirect('empresa')
+
+        # Construir el payload para el backend REST
+        payload = {
+            "comercio": nombre_comercio,
+            "contacto": contacto,
+            "telefono": telefono,
+            "email": email,
+            "direccion": localidad,
+            "localidad": localidad,
+            "zona": int(zona_id),
+            "observaciones": mensaje
+        }
+
+        try:
+            # Enviar la solicitud a la API central
+            res_solicitud = requests.post(
+                f"{base_api}/solicitudes-visita/",
+                json=payload,
+                headers={'Content-Type': 'application/json'},
+                timeout=5
+            )
+
+            if res_solicitud.status_code in [200, 201]:
+                messages.success(
+                    request, 
+                    f'¡Gracias {contacto}! Tu solicitud para "{nombre_comercio}" fue enviada con éxito. '
+                    f'El vendedor asignado a tu zona se pondrá en contacto a la brevedad.'
+                )
+                return redirect('empresa')
+            else:
+                messages.error(
+                    request, 
+                    'No se pudo registrar la solicitud. Verifica que todos los campos sean correctos.'
+                )
+
+        except requests.exceptions.RequestException:
+            messages.error(
+                request, 
+                'Ocurrió un error al comunicar con el servidor central. Inténtalo nuevamente más tarde.'
+            )
+
+    context = {
+        'zonas': zonas,
+        'esta_autenticado': bool(request.session.get('access_token')),
+    }
+    return render(request, 'core/empresa.html', context)

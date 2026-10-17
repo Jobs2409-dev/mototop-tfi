@@ -61,6 +61,12 @@ from views.envio_view import EnvioView
 from services.pago_service import PagoService
 from views.pago_view import PagoView
 
+# =========================
+# SOLICITUDES DE VISITA
+# =========================
+from services.solicitud_visita_service import SolicitudVisitaService
+from views.solicitud_visita_view import SolicitudVisitaView
+
 
 class MainWindow(QWidget):
 
@@ -81,6 +87,7 @@ class MainWindow(QWidget):
         self.informe_service = InformeService(self.http)
         self.envio_service = EnvioService(self.http)
         self.pago_service = PagoService(self.http)
+        self.solicitud_service = SolicitudVisitaService(self.http)
 
         # =========================
         # WINDOW
@@ -128,6 +135,7 @@ class MainWindow(QWidget):
         btn_productos = QPushButton("Productos")
         btn_vendedores = QPushButton("Vendedores")
         btn_clientes = QPushButton("Clientes")
+        btn_solicitudes = QPushButton("Solicitudes Visita")
         btn_pedidos = QPushButton("Pedidos")
         btn_facturas = QPushButton("Facturas")
         # btn_compras = QPushButton("Compras")
@@ -138,6 +146,7 @@ class MainWindow(QWidget):
         sidebar_layout.addWidget(btn_productos)
         sidebar_layout.addWidget(btn_vendedores)
         sidebar_layout.addWidget(btn_clientes)
+        sidebar_layout.addWidget(btn_solicitudes)
         sidebar_layout.addWidget(btn_pedidos)
         sidebar_layout.addWidget(btn_facturas)
         # sidebar_layout.addWidget(btn_compras)
@@ -165,6 +174,7 @@ class MainWindow(QWidget):
         self.view_productos = ProductoView(self.producto_service)
         self.view_vendedores = VendedorView(self.http)
         self.view_clientes = ClienteView(self.http)
+        self.view_solicitudes = SolicitudVisitaView(self.solicitud_service, self.vendedor_service)
         self.view_pedidos = PedidoView(
             self.pedido_service,
             self.cliente_service,
@@ -183,6 +193,7 @@ class MainWindow(QWidget):
         self.stack.addWidget(self.view_productos)
         self.stack.addWidget(self.view_vendedores)
         self.stack.addWidget(self.view_clientes)
+        self.stack.addWidget(self.view_solicitudes)
         self.stack.addWidget(self.view_pedidos)
         self.stack.addWidget(self.view_facturas)
         self.stack.addWidget(self.view_compras)
@@ -197,9 +208,15 @@ class MainWindow(QWidget):
             self.view_productos.load_data()  # Refresca stock en tiempo real desde la API
             self.stack.setCurrentWidget(self.view_productos)
 
+        def ir_a_solicitudes():
+            self.view_solicitudes.load_data()  # <-- AGREGAR ESTA FUNCIÓN NUEVA
+            self.stack.setCurrentWidget(self.view_solicitudes)
+
+
         btn_productos.clicked.connect(ir_a_productos)
         btn_vendedores.clicked.connect(lambda: self.stack.setCurrentWidget(self.view_vendedores))
         btn_clientes.clicked.connect(lambda: self.stack.setCurrentWidget(self.view_clientes))
+        btn_solicitudes.clicked.connect(ir_a_solicitudes)
         btn_pedidos.clicked.connect(lambda: self.stack.setCurrentWidget(self.view_pedidos))
         btn_facturas.clicked.connect(lambda: self.stack.setCurrentWidget(self.view_facturas))
         # btn_compras.clicked.connect(lambda: self.stack.setCurrentWidget(self.view_compras))

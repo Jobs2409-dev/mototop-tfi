@@ -3,9 +3,31 @@
 .card {
     background-color: #ffffff;
     border-radius: 8px;
+    border: 1px solid #121212;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
+.card-header {
+    background-color: #121212 !important;
+    color: #ffffff !important;
+    border-bottom: 3px solid #d32f2f;
+}
+
+/* Enfoque de inputs en rojo corporativo MotoTop */
 .form-control:focus {
-    border-color: #ffc107;
-    box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.25);
+    border-color: #d32f2f;
+    box-shadow: 0 0 0 0.25rem rgba(211, 47, 47, 0.25);
+}
+
+.btn-primary {
+    background-color: #d32f2f !important;
+    border-color: #d32f2f !important;
+    color: #ffffff !important;
+    font-weight: 600;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background-color: #b71c1c !important;
+    border-color: #b71c1c !important;
 }

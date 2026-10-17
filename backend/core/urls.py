@@ -19,6 +19,7 @@ router.register(r'promociones', PromocionViewSet)
 router.register(r'users', UserViewSet)
 router.register(r'producto-promociones', ProductoPromocionViewSet)
 router.register(r'informes', InformeViewSet, basename='informes')
+router.register(r'solicitudes-visita', SolicitudVisitaViewSet, basename='solicitudes-visita')
 
 urlpatterns = router.urls + [
     path('ai/chat/', GeminiChatView.as_view(), name='gemini-chat'),

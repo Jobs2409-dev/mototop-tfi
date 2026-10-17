@@ -1,11 +1,6 @@
 # backend/core/serializers.py
 from rest_framework import serializers
-from .models import (
-    Zona, Cliente, Vendedor, Producto, Rubro, Proveedor,
-    RubroProducto, ProveedorProducto, Pedido, DetallePedido,
-    Compra, DetalleCompra, Factura, DetalleFactura, Pago,
-    Envio, Promocion, ProductoPromocion
-)
+from .models import *
 from django.db import transaction
 from django.db.models import Sum
 from django.contrib.auth.models import User
@@ -485,3 +480,32 @@ class GeminiChatSerializer(serializers.Serializer):
     prompt = serializers.CharField(max_length=1000, required=True)
     
     
+
+# SOLICITUD DE VISITA ==============================================
+
+class SolicitudVisitaWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SolicitudVisita
+        fields = [
+            'id', 'comercio', 'contacto', 'telefono', 'email',
+            'direccion', 'localidad', 'zona', 'vendedor',
+            'observaciones', 'estado'
+        ]
+        extra_kwargs = {
+            'vendedor': {'required': False, 'allow_null': True},
+            'observaciones': {'required': False, 'allow_blank': True, 'allow_null': True},
+            'estado': {'required': False, 'default': 'pendiente'}
+        }
+
+
+class SolicitudVisitaReadSerializer(serializers.ModelSerializer):
+    zona = ZonaSerializer()
+    vendedor = VendedorSerializer()
+
+    class Meta:
+        model = SolicitudVisita
+        fields = [
+            'id', 'comercio', 'contacto', 'telefono', 'email',
+            'direccion', 'localidad', 'zona', 'vendedor',
+            'observaciones', 'estado', 'fecha_creacion'
+        ]

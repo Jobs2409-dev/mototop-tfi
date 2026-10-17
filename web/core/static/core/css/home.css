@@ -4,6 +4,8 @@
     position: absolute;
     top: 0.5rem;
     left: 0.5rem;
+    background-color: #e53935 !important; /* Rojo destacado para ofertas */
+    color: #ffffff;
 }
 
 .product-img {
@@ -15,4 +17,3 @@
 .no-img-placeholder {
     height: 200px;
 }
-

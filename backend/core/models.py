@@ -448,3 +448,34 @@ class ProductoPromocion(models.Model):
 
     def __str__(self):
         return f"{self.producto} - {self.promocion}"
+
+
+
+# SolicitudVisita
+class SolicitudVisita(models.Model):
+    ESTADO_CHOICES = [
+        ('pendiente', 'Pendiente'),
+        ('asignado', 'Asignado'),
+        ('contactado', 'Contactado'),
+        ('cancelado', 'Cancelado'),
+    ]
+
+    comercio = models.CharField(max_length=150)
+    contacto = models.CharField(max_length=100)
+    telefono = models.CharField(max_length=50)
+    email = models.EmailField()
+    direccion = models.CharField(max_length=150)
+    localidad = models.CharField(max_length=100)
+    
+    zona = models.ForeignKey(Zona, on_delete=models.PROTECT, related_name='solicitudes')
+    vendedor = models.ForeignKey(Vendedor, on_delete=models.SET_NULL, null=True, blank=True, related_name='solicitudes')
+    
+    observaciones = models.TextField(blank=True, null=True)
+    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='pendiente')
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-fecha_creacion']
+
+    def __str__(self):
+        return f"Solicitud #{self.id} - {self.comercio} ({self.get_estado_display()})"

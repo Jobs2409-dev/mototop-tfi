@@ -1,8 +1,10 @@
-# Entornos virtuales (en cualquier subcarpeta)
-**/.venv/
-**/.webenv/
-**/venv/
-**/env/
+# Entornos virtuales (Rutas específicas y generales)
+web/.webenv/
+desktop/.venv/
+.venv/
+.webenv/
+venv/
+env/
 
 # Python
 **/__pycache__/

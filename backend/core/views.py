@@ -4,12 +4,8 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
-from .models import (
-    Zona, Cliente, Vendedor, Producto, Rubro, Proveedor,
-    RubroProducto, ProveedorProducto, Pedido, DetallePedido,
-    Compra, DetalleCompra, Factura, DetalleFactura, Pago,
-    Envio, Promocion, ProductoPromocion
-)
+from .models import *
+
 from .serializers import *
 from django.contrib.auth.models import User
 from django.db.models import Sum, F, Q, Value, DecimalField, IntegerField
@@ -425,5 +421,61 @@ class GeminiChatView(APIView):
                 {'error': str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-            
-                      
+
+
+# SolicitudVisitaViewSet
+class SolicitudVisitaViewSet(viewsets.ModelViewSet):
+    queryset = SolicitudVisita.objects.all()
+    permission_classes = [AllowAny]
+
+    def get_serializer_class(self):
+        if self.action in ['list', 'retrieve']:
+            return SolicitudVisitaReadSerializer
+        return SolicitudVisitaWriteSerializer
+
+    @action(detail=True, methods=['post'], url_path='asignar-vendedor')
+    def asignar_vendedor(self, request, pk=None):
+        solicitud = self.get_object()
+        vendedor_id = request.data.get('vendedor_id')
+
+        if not vendedor_id:
+            return Response(
+                {"error": "Debe proporcionar el parámetro vendedor_id"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            vendedor = Vendedor.objects.get(id=vendedor_id)
+            solicitud.vendedor = vendedor
+            solicitud.estado = 'asignado'
+            solicitud.save()
+
+            return Response(
+                {"mensaje": f"Solicitud asignada a {vendedor.nombre} {vendedor.apellido or ''}".strip()},
+                status=status.HTTP_200_OK
+            )
+        except Vendedor.DoesNotExist:
+            return Response(
+                {"error": "El vendedor especificado no existe"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+    @action(detail=True, methods=['post'], url_path='cambiar-estado')
+    def cambiar_estado(self, request, pk=None):
+        solicitud = self.get_object()
+        nuevo_estado = request.data.get('estado')
+
+        if not nuevo_estado:
+            return Response(
+                {"error": "Debe proporcionar el parámetro estado"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        solicitud.estado = nuevo_estado
+        solicitud.save()
+
+        return Response(
+            {"mensaje": f"Estado actualizado a {nuevo_estado}"},
+            status=status.HTTP_200_OK
+        )
+    
