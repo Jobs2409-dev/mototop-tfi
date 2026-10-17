@@ -32,7 +32,7 @@ function addToCart(id, nombre, precio, stockMax) {
 
     saveCart();
 
-    // Abrir automáticamente el Sidebar para darle feedback al usuario
+    // Deslizar automáticamente el Offcanvas al agregar un producto
     const cartSidebarEl = document.getElementById('cartSidebar');
     if (cartSidebarEl) {
         const bsOffcanvas = bootstrap.Offcanvas.getOrCreateInstance(cartSidebarEl);
@@ -161,5 +161,3 @@ function getCookie(name) {
     }
     return cookieValue;
 }
-
-

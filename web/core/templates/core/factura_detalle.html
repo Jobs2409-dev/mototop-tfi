@@ -2,26 +2,66 @@
 {% extends 'core/base.html' %}
 {% load static %}
 
+{% block extra_css %}
+<style>
+  @media print {
+    /* Ocultar elementos de navegación, footer, botones e IA */
+    header,
+    footer,
+    .ai-chat-btn,
+    .ai-chat-window,
+    .no-print {
+      display: none !important;
+    }
+
+    /* Ajustar lienzo a la hoja de impresión */
+    body {
+      background-color: #ffffff !important;
+      color: #000000 !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    .container {
+      max-width: 100% !important;
+      width: 100% !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    .card {
+      border: none !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+    }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container my-5">
-  <div class="d-flex justify-content-between align-items-center mb-4">
+  <!-- Barra superior de acciones (se oculta al imprimir) -->
+  <div class="d-flex justify-content-between align-items-center mb-4 no-print">
     <a href="{% url 'mis_pedidos' %}" class="btn btn-outline-secondary btn-sm">
       <i class="bi bi-arrow-left me-1"></i> Volver a Mis Pedidos
     </a>
-    <button onclick="window.print()" class="btn btn-warning btn-sm fw-semibold">
+    <button onclick="window.print()" class="btn btn-danger btn-sm fw-semibold">
       <i class="bi bi-printer me-1"></i> Imprimir Comprobante
     </button>
   </div>
 
   <div class="card shadow border-0 rounded-3 p-4 bg-white">
-    <!-- Encabezado de Factura -->
+    <!-- Encabezado de Factura con Logo -->
     <div class="row border-bottom pb-4 mb-4 align-items-center">
-      <div class="col-sm-6">
-        <h3 class="fw-bold text-dark mb-0">DISTRIBUIDORA MOTO-TOP</h3>
-        <p class="text-muted small mb-0">Comprobante Oficial de Venta</p>
+      <div class="col-sm-6 d-flex align-items-center gap-3">
+        <img src="{% static 'core/img/logo.png' %}" alt="Logo MOTO-TOP" style="max-height: 55px; width: auto; object-fit: contain;" />
+        <div>
+          <h3 class="fw-bold text-dark mb-0">DISTRIBUIDORA MOTO-TOP</h3>
+          <p class="text-muted small mb-0">Comprobante Oficial de Venta</p>
+        </div>
       </div>
       <div class="col-sm-6 text-sm-end mt-3 mt-sm-0">
-        <h4 class="text-warning fw-bold mb-0">Factura #{{ factura.id }}</h4>
+        <h4 class="text-danger fw-bold mb-0">Factura #{{ factura.id }}</h4>
         <span class="text-secondary small">Emisión: {{ factura.fecha_emision|slice:":10" }}</span>
         <div class="mt-1">
           <span class="badge bg-dark">Pedido Ref: #{{ pedido_id }}</span>
@@ -37,7 +77,7 @@
           {% if factura.estado_pago == 'pagada' %}
             <span class="badge bg-success text-uppercase">Pagada Totalmente</span>
           {% elif factura.estado_pago == 'parcialmente_pagada' %}
-            <span class="badge bg-warning text-dark text-uppercase">Pago Parcial</span>
+            <span class="badge bg-danger text-white text-uppercase">Pago Parcial</span>
           {% else %}
             <span class="badge bg-danger text-uppercase">Impaga / Pendiente</span>
           {% endif %}
@@ -90,5 +130,3 @@
   </div>
 </div>
 {% endblock %}
-
-

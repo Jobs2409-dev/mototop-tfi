@@ -39,14 +39,14 @@
                         <input type="password" name="password" id="password" class="form-control" required placeholder="••••••••">
                     </div>
 
-                    <button type="submit" class="btn btn-warning w-100 fw-bold text-uppercase py-2">
+                    <button type="submit" class="btn btn-danger w-100 fw-bold text-uppercase py-2">
                         Ingresar
                     </button>
 
                     <!-- Al final del formulario en login.html -->
                     <div class="text-center mt-3">
                         <span class="text-muted small">¿No tenés una cuenta? </span>
-                        <a href="{% url 'register' %}" class="small text-warning fw-bold text-decoration-none">Registrate acá</a>
+                        <a href="{% url 'register' %}" class="small text-danger fw-bold text-decoration-none">Registrate acá</a>
                     </div>
                 </form>
 
@@ -55,4 +55,3 @@
     </div>
 </div>
 {% endblock %}
-

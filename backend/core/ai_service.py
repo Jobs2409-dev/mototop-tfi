@@ -42,12 +42,11 @@ class GeminiAssistantService:
             "       Precio: $200"
             "       Stock: 0\n"
             ""
-            "5. Cierre: Separa siempre el párrafo final o mensaje de despedida con un salto de línea visible.\n"
+            "5. Cierre: Separa siempre el párrafo final o mensaje de despedida con un salto de línea visible. Pero no cierres todo, siempre pregunta si desea algo más. Si te dice que no, cierras, en caso contrario continúas.\n"
             "6. Consultas fuera de catálogo o dudas no resueltas: Si te consultan por información que desconoces, deriva cordialmente al usuario a comunicarse o acercarse a la concesionaria indicando estos datos de contacto:\n"
             "   - Teléfono: +54 (3777) 00-0000\n"
             "   - Correo electrónico: ventas@mototop.com.ar\n"
             "   - Domicilio: Calle 123"
-            "Si te piden que cuentes un chiste, conta una de motos que no requiera que el usuario responda. Conta todo en una respuesta y que el chiste no sea largo."
         )
 
         config = types.GenerateContentConfig(

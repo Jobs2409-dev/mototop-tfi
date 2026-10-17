@@ -27,7 +27,7 @@
         <div class="carousel-item active">
           <div class="d-flex flex-column align-items-center justify-content-center bg-dark text-white p-5 text-center" style="height: 320px; background: linear-gradient(135deg, #1a1a1a 0%, #333333 100%);">
             <img src="{% static 'core/img/logo.png' %}" alt="MOTO-TOP" class="mb-3" style="max-height: 90px; object-fit: contain;" />
-            <h2 class="display-6 fw-bold text-warning text-uppercase">DISTRIBUIDORA MOTO-TOP</h2>
+            <h2 class="display-6 fw-bold text-danger text-uppercase">DISTRIBUIDORA MOTO-TOP</h2>
             <p class="fs-5 text-light col-md-8 mb-0">Calidad, stock permanente y envíos a toda la provincia y región.</p>
           </div>
         </div>
@@ -35,7 +35,7 @@
         <!-- SLIDE 2: Banner de Envíos y Cobertura -->
         <div class="carousel-item">
           <div class="d-flex flex-column align-items-center justify-content-center bg-dark text-white p-5 text-center" style="height: 320px; background: linear-gradient(135deg, #2c3e50 0%, #000000 100%);">
-            <span class="badge bg-warning text-dark fs-6 mb-2 text-uppercase fw-bold">Envíos a la Región</span>
+            <span class="badge bg-danger text-white fs-6 mb-2 text-uppercase fw-bold">Envíos a la Región</span>
             <h2 class="display-6 fw-bold text-white text-uppercase">LLEGAMOS A DONDE ESTÁS</h2>
             <p class="fs-5 text-light col-md-8 mb-0">Atención personalizada en Corrientes, Misiones, Chaco y Formosa.</p>
           </div>
@@ -55,7 +55,7 @@
 
               <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-75 rounded-3 p-3">
                 <span class="badge bg-danger mb-2 fs-6">{{ prod.descuento_str }}</span>
-                <h3 class="fw-bold text-warning text-uppercase mb-1">{{ prod.nombre }}</h3>
+                <h3 class="fw-bold text-danger text-uppercase mb-1">{{ prod.nombre }}</h3>
                 <p class="mb-0 fs-5">
                   ¡Precio Oferta! <strong>${{ prod.precio_final|floatformat:2 }}</strong>
                 </p>
@@ -84,7 +84,7 @@
           <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
             {% for prod in promo.productos %}
               <div class="col">
-                <div class="card h-100 shadow-sm border-warning border-1 position-relative">
+                <div class="card h-100 shadow-sm border-danger border-1 position-relative">
                   <span class="badge bg-danger fs-6 card-promo-badge position-absolute top-0 end-0 m-2">{{ prod.descuento_str }}</span>
                   {% if prod.stock == 0 %}
                     <span class="badge bg-secondary text-white position-absolute top-0 start-0 m-2 fw-bold">Agotado</span>
@@ -103,9 +103,9 @@
                       <p class="text-danger fs-5 fw-bold mb-2">Ahora: ${{ prod.precio_final|floatformat:2 }}</p>
 
                       {% if esta_autenticado %}
-                        <button class="btn btn-warning btn-sm w-100 fw-semibold" onclick="addToCart({{ prod.id }}, '{{ prod.nombre|escapejs }}', {{ prod.precio_final }}, {{ prod.stock }})"><i class="bi bi-plus-circle me-1"></i> Agregar al Pedido</button>
+                        <button class="btn btn-danger btn-sm w-100 fw-semibold" onclick="addToCart({{ prod.id }}, '{{ prod.nombre|escapejs }}', {{ prod.precio_final }}, {{ prod.stock }})"><i class="bi bi-plus-circle me-1"></i> Agregar al Pedido</button>
                       {% else %}
-                        <a href="{% url 'login' %}" class="btn btn-outline-warning btn-sm w-100 fw-semibold" title="Iniciá sesión para hacer un pedido">Iniciá sesión para pedir</a>
+                        <a href="{% url 'login' %}" class="btn btn-outline-danger btn-sm w-100 fw-semibold" title="Iniciá sesión para hacer un pedido">Iniciá sesión para pedir</a>
                       {% endif %}
                     </div>
                   </div>
@@ -128,7 +128,7 @@
               <div class="card h-100 shadow-sm border-0">
                 {% if prod.en_promocion %}
                   <span class="badge bg-danger position-absolute top-0 end-0 m-2">{{ prod.descuento_str }}</span>
-                  <span class="badge bg-warning text-dark position-absolute top-0 start-0 m-2 fw-bold">EN PROMOCIÓN</span>
+                  <span class="badge bg-danger text-white position-absolute top-0 start-0 m-2 fw-bold">EN PROMOCIÓN</span>
                 {% endif %}
                 {% if prod.stock == 0 %}
                   <span class="badge bg-secondary text-white position-absolute top-0 start-50 translate-middle-x m-2 fw-bold">Agotado</span>
@@ -155,9 +155,9 @@
                     {% endif %}
 
                     {% if esta_autenticado %}
-                      <button class="btn btn-warning btn-sm w-100 fw-semibold" onclick="addToCart({{ prod.id }}, '{{ prod.nombre|escapejs }}', {{ prod.precio_final }}, {{ prod.stock }})"><i class="bi bi-plus-circle me-1"></i> Agregar al Pedido</button>
+                      <button class="btn btn-danger btn-sm w-100 fw-semibold" onclick="addToCart({{ prod.id }}, '{{ prod.nombre|escapejs }}', {{ prod.precio_final }}, {{ prod.stock }})"><i class="bi bi-plus-circle me-1"></i> Agregar al Pedido</button>
                     {% else %}
-                      <a href="{% url 'login' %}" class="btn btn-outline-warning btn-sm w-100 fw-semibold">Iniciá sesión para pedir</a>
+                      <a href="{% url 'login' %}" class="btn btn-outline-danger btn-sm w-100 fw-semibold">Iniciá sesión para pedir</a>
                     {% endif %}
                   </div>
                 </div>

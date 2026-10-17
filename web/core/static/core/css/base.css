@@ -36,7 +36,7 @@ footer {
 /* --- Estilos para la sección del Mapa en el Footer --- */
 .footer-map h5,
 .footer-map h6 {
-    color: #e53935; /* Cambiado de amarillo a Rojo MotoTop */
+    color: #e53935; /* Rojo MotoTop */
     font-size: 0.95rem;
     font-weight: 700;
     margin-bottom: 0.75rem;
@@ -148,4 +148,9 @@ footer {
     border: 1px solid #212529;
     align-self: flex-start;
     border-bottom-left-radius: 2px;
+}
+
+/* Transición suave de deslizamiento para el offcanvas */
+.offcanvas.offcanvas-end {
+    transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1) !important;
 }

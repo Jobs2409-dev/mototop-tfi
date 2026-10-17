@@ -29,7 +29,7 @@
                 <form method="POST" action="{% url 'register' %}">
                     {% csrf_token %}
                     
-                    <h6 class="text-warning fw-bold border-bottom pb-1 mb-3">Datos de Cuenta</h6>
+                    <h6 class="text-danger fw-bold border-bottom pb-1 mb-3">Datos de Cuenta</h6>
                     <div class="row">
                         <div class="col-12 mb-3">
                             <label for="username" class="form-label text-secondary small fw-semibold">Nombre de Usuario</label>
@@ -45,7 +45,7 @@
                         </div>
                     </div>
 
-                    <h6 class="text-warning fw-bold border-bottom pb-1 mb-3 mt-2">Datos Personales</h6>
+                    <h6 class="text-danger fw-bold border-bottom pb-1 mb-3 mt-2">Datos Personales</h6>
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="nombre" class="form-label text-secondary small fw-semibold">Nombre</label>
@@ -69,7 +69,7 @@
                         </div>
                     </div>
 
-                    <h6 class="text-warning fw-bold border-bottom pb-1 mb-3 mt-2">Ubicación</h6>
+                    <h6 class="text-danger fw-bold border-bottom pb-1 mb-3 mt-2">Ubicación</h6>
                     <div class="row">
                         <div class="col-md-8 mb-3">
                             <label for="direccion" class="form-label text-secondary small fw-semibold">Dirección</label>
@@ -89,13 +89,13 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="btn btn-warning w-100 fw-bold text-uppercase py-2 mb-3">
+                    <button type="submit" class="btn btn-danger w-100 fw-bold text-uppercase py-2 mb-3">
                         Registrarme
                     </button>
 
                     <div class="text-center">
                         <span class="text-muted small">¿Ya tenés una cuenta? </span>
-                        <a href="{% url 'login' %}" class="small text-warning fw-bold text-decoration-none">Iniciá sesión acá</a>
+                        <a href="{% url 'login' %}" class="small text-danger fw-bold text-decoration-none">Iniciá sesión acá</a>
                     </div>
                 </form>
 
@@ -104,4 +104,3 @@
     </div>
 </div>
 {% endblock %}
-
