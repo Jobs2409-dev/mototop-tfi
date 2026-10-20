@@ -33,6 +33,9 @@ class ProductoCard(QWidget):
         self.service = service
         self.refresh = refresh_callback
 
+        # Permitir la compresión fluida dentro del layout de la grid
+        self.setMinimumWidth(0)
+
         self.rubro_service = RubroService(self.service.http)
         self.proveedor_service = ProveedorService(self.service.http)
         self.promocion_service = PromocionService(self.service.http)
@@ -54,7 +57,7 @@ class ProductoCard(QWidget):
         self.img_label = QLabel()
         self.img_label.setObjectName("product_image")
         self.img_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.img_label.setMinimumSize(150, 150)
+        self.img_label.setMinimumSize(120, 120)
 
         if producto.get("img"):
             try:
@@ -93,6 +96,7 @@ class ProductoCard(QWidget):
         nombres_rubros = ", ".join([r["nombre"] for r in rubros if isinstance(r, dict)]) or "Sin rubro"
         lbl_rubros = QLabel(f"🏷️ {nombres_rubros}")
         lbl_rubros.setObjectName("product_rubros")
+        lbl_rubros.setWordWrap(True)
         layout.addWidget(lbl_rubros)
         
         # Mostrar Proveedores asociados
@@ -100,8 +104,8 @@ class ProductoCard(QWidget):
         nombres_prov = ", ".join([p["nombre"] for p in proveedores if isinstance(p, dict)]) or "Sin proveedor"
         lbl_prov = QLabel(f"🏭 {nombres_prov}")
         lbl_prov.setObjectName("product_proveedores")
+        lbl_prov.setWordWrap(True)
         layout.addWidget(lbl_prov)
-        
         
         lbl_id = QLabel(f"ID: {producto['id']}")
         lbl_id.setObjectName("product_id")

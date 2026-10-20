@@ -1,4 +1,3 @@
-# desktop/app/style/views/pedido_view_style.py
 ESTILO_PRODUCTO_VIEW = """
 /* Barra superior */
 QPushButton#btn_nuevo_producto {
@@ -40,5 +39,14 @@ QLabel#lbl_numero_pagina {
 QScrollArea#scroll_productos {
     border: none;
     background-color: transparent;
+}
+
+/* Restricción para impedir desbordes horizontales */
+QScrollArea#scroll_productos > QWidget > QWidget {
+    background-color: transparent;
+}
+
+QWidget#standard_card, QWidget#active_promo_card {
+    min-width: 0px;
 }
 """

@@ -1,8 +1,8 @@
-# desktop/app/views/producto_view.py
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QPushButton,
     QHBoxLayout, QLabel, QScrollArea, QGridLayout, QMessageBox
 )
+from PyQt6.QtCore import Qt
 
 from services.rubro_service import RubroService
 from services.proveedor_service import ProveedorService
@@ -24,7 +24,6 @@ class ProductoView(QWidget):
         self.has_next = False
         self.has_prev = False
 
-        # 1. Aplicar estilo desacoplado
         self.setStyleSheet(ESTILO_PRODUCTO_VIEW)
 
         layout = QVBoxLayout()
@@ -69,11 +68,19 @@ class ProductoView(QWidget):
         self.container = QWidget()
         self.grid = QGridLayout()
         self.grid.setSpacing(12)
+        self.grid.setContentsMargins(0, 0, 0, 0)
+
+        # Repartir equitativamente el ancho en 3 columnas
+        for col in range(3):
+            self.grid.setColumnStretch(col, 1)
+
         self.container.setLayout(self.grid)
 
         self.scroll = QScrollArea()
         self.scroll.setObjectName("scroll_productos")
         self.scroll.setWidgetResizable(True)
+        self.scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         self.scroll.setWidget(self.container)
 
         layout.addLayout(top_bar)
@@ -101,6 +108,7 @@ class ProductoView(QWidget):
             cols = 3
             for i, p in enumerate(productos):
                 card = ProductoCard(p, self.service, self.load_data)
+                
                 row = i // cols
                 col = i % cols
                 self.grid.addWidget(card, row, col)
